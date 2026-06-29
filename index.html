@@ -295,11 +295,12 @@
     /* =====================================================
        SECRET ADMIN TRIGGER & FLOATING COMPONENTS
     ===================================================== */
-    #secret-lock-container { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 2000; display: flex; flex-direction: column; align-items: flex-end; gap: 1rem; }
-    #lock-trigger { width: 36px; height: 36px; border-radius: 50%; background: var(--bg-card); color: var(--gray-ink); box-shadow: var(--shadow-sm); display: flex; align-items: center; justify-content: center; font-size: 0.85rem; transition: all var(--transition); border: 1px solid var(--divider); opacity: 0.5;}
-    #lock-trigger:hover { opacity: 1; color: var(--chocolate); box-shadow: var(--shadow-md); transform: scale(1.05); }
-    #secret-login-modal { display: none; background: var(--white); border: 1px solid var(--chocolate); padding: 2rem; box-shadow: 0 15px 40px rgba(0,0,0,0.2); width: 300px; border-radius: 12px; animation: modalFade 0.3s ease; }
+    #secret-lock-container { position: absolute; bottom: 0; right: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 0.75rem; padding: 1rem; }
+    #lock-trigger { width: 30px; height: 30px; border-radius: 50%; background: rgba(251,249,246,0.1); color: rgba(251,249,246,0.35); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; transition: all var(--transition); border: 1px solid rgba(251,249,246,0.15); }
+    #lock-trigger:hover { color: var(--bg-cream); background: rgba(251,249,246,0.2); transform: scale(1.05); }
+    #secret-login-modal { display: none; background: var(--white); border: 1px solid var(--chocolate); padding: 2rem; box-shadow: 0 15px 40px rgba(0,0,0,0.4); width: 280px; border-radius: 12px; animation: modalFade 0.3s ease; position: absolute; bottom: 48px; right: 0; z-index: 2000; }
     #secret-login-modal.open { display: block; }
+    @media (max-width: 400px) { #secret-login-modal { width: 240px; } }
 
     .toast {
       position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(100px);
@@ -364,7 +365,6 @@
     <div class="social-icons">
       <a href="https://x.com" target="_blank" title="X (Twitter)"><i class="fa-brands fa-x-twitter"></i></a>
       <a href="https://www.instagram.com/narenarlidere/" target="_blank" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
-      <a href="https://facebook.com" target="_blank" title="Facebook"><i class="fa-brands fa-facebook"></i></a>
     </div>
   </header>
 
@@ -382,29 +382,6 @@
         <button class="home-cta-btn" onclick="window.location.hash = 'menu'">Menüyü Keşfet</button>
       </div>
 
-      <div class="home-features-grid">
-        <div class="feature-card">
-          <img src="https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=500" class="feature-card-img" alt="Waffle" />
-          <div class="feature-card-body">
-            <h3 class="feature-card-title">Artisan Waffle'lar</h3>
-            <p class="feature-card-text">Belçika ekolüyle fırından yeni çıkmış sıcacık çıtır hamurlar, taze meyveler ve eritilmiş premium çikolata sosu.</p>
-          </div>
-        </div>
-        <div class="feature-card">
-          <img src="https://images.unsplash.com/photo-1511690656952-34342bb7c2f2?w=500" class="feature-card-img" alt="Healthy Bowls" />
-          <div class="feature-card-body">
-            <h3 class="feature-card-title">Sağlıklı Kaseler</h3>
-            <p class="feature-card-text">Süzme yoğurt, chia tohumu ve yulaf eşliğinde; antioksidan kaynağı taze yaban mersini ve muz dilimleriyle hafif seçenekler.</p>
-          </div>
-        </div>
-        <div class="feature-card">
-          <img src="https://images.unsplash.com/photo-1587314168485-3236d6710814?w=500" class="feature-card-img" alt="Dessert" />
-          <div class="feature-card-body">
-            <h3 class="feature-card-title">Özel Kavanoz Tatlıları</h3>
-            <p class="feature-card-text">Günlük hazırlanan hafif kremalar, ipeksi kadife kıvamı ve kat kat bisküvi çıtırlarıyla sunulan modern lezzetler.</p>
-          </div>
-        </div>
-      </div>
     </section>
 
     <!-- VIEW 2: PUBLIC MENU -->
@@ -518,20 +495,19 @@
         </div>
       </div>
     </div>
-    <div class="footer-bottom">
+    <div class="footer-bottom" style="position:relative;">
       &copy; 2026 Nâre Pâtisserie & Kitchen. Tüm hakları saklıdır.
+      <div id="secret-lock-container">
+        <div id="secret-login-modal">
+          <div class="form-group"><label>E-Posta</label><input type="email" id="login-email" class="form-ctrl" /></div>
+          <div class="form-group"><label>Şifre</label><input type="password" id="login-password" class="form-ctrl" /></div>
+          <button class="btn btn-dark btn-sm" id="btn-login" style="width:100%; margin-top:0.5rem;">Giriş Yap</button>
+        </div>
+        <button id="lock-trigger" aria-label="Yönetici Girişi Panel"><i class="fa-solid fa-lock"></i></button>
+      </div>
     </div>
   </footer>
 
-  <!-- SECRET ADMIN TRIGGER -->
-  <div id="secret-lock-container">
-    <div id="secret-login-modal">
-      <div class="form-group"><label>E-Posta</label><input type="email" id="login-email" class="form-ctrl" /></div>
-      <div class="form-group"><label>Şifre</label><input type="password" id="login-password" class="form-ctrl" /></div>
-      <button class="btn btn-dark btn-sm" id="btn-login" style="width:100%; margin-top:0.5rem;">Giriş Yap</button>
-    </div>
-    <button id="lock-trigger" aria-label="Yönetici Girişi Panel"><i class="fa-solid fa-lock"></i></button>
-  </div>
 
   <script>
     'use strict';
@@ -588,6 +564,12 @@
     }
 
     window.addEventListener('hashchange', handleRouting);
+
+    // Mobil hamburger menü aç/kapat
+    document.getElementById('nav-toggle').addEventListener('click', () => {
+      document.getElementById('nav-tabs').classList.toggle('open');
+      document.getElementById('nav-toggle').classList.toggle('open');
+    });
 
     // Mobil menü tıklandığında menünün pürüzsüz kapanması
     document.querySelectorAll('.nav-tabs a').forEach(el => {
