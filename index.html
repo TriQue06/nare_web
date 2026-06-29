@@ -351,17 +351,19 @@
   </div>
 
   <header id="navbar">
-    <div class="brand-logo" onclick="showView('home')">Nâre</div>
+    <!-- QR Kod dostu Hash değişimi -->
+    <div class="brand-logo" onclick="window.location.hash = 'home'">Nâre</div>
     <button class="nav-toggle" aria-label="Menü" id="nav-toggle"><span></span><span></span><span></span></button>
     <ul class="nav-tabs" id="nav-tabs" role="tablist">
-      <li><a href="#" data-target="home" class="active">Ana Sayfa</a></li>
-      <li><a href="#" data-target="menu">Menü</a></li>
-      <li><a href="#" data-target="about">Hakkımızda</a></li>
-      <li><a href="#" data-target="admin" class="admin-badge-tab">Panel</a></li>
+      <!-- Bağlantılar artık doğrudan hash kullanıyor -->
+      <li><a href="#home" class="active">Ana Sayfa</a></li>
+      <li><a href="#menu">Menü</a></li>
+      <li><a href="#about">Hakkımızda</a></li>
+      <li><a href="#admin" class="admin-badge-tab">Panel</a></li>
     </ul>
     <div class="social-icons">
       <a href="https://x.com" target="_blank" title="X (Twitter)"><i class="fa-brands fa-x-twitter"></i></a>
-      <a href="https://www.instagram.com/narenarlidere/" target="_blank" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
+      <a href="https://instagram.com" target="_blank" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
       <a href="https://facebook.com" target="_blank" title="Facebook"><i class="fa-brands fa-facebook"></i></a>
     </div>
   </header>
@@ -376,7 +378,8 @@
           Eşsiz reçetelerle taze meyveleri, el yapımı çıtır hamurları ve en kaliteli çikolataları bir araya getiriyoruz. 
           Nâre dünyasındaki her bir lokma, özenle tasarlanmış bir lezzet yolculuğudur.
         </p>
-        <button class="home-cta-btn" onclick="showView('menu')">Menüyü Keşfet</button>
+        <!-- Hash Yönlendirmeli CTA -->
+        <button class="home-cta-btn" onclick="window.location.hash = 'menu'">Menüyü Keşfet</button>
       </div>
 
       <div class="home-features-grid">
@@ -503,12 +506,11 @@
       <div class="footer-contact">
         <h4>İletişim</h4>
         <p><i class="fa-solid fa-phone"></i> 0538 687 18 53</p>
-        <p><i class="fa-brands fa-instagram"></i> @narenarlidere</p>
+        <p><i class="fa-brands fa-instagram"></i> @narepatisserie</p>
       </div>
       <div class="footer-location">
         <h4 style="font-family:var(--font-sans); font-size:1.1rem; margin-bottom:1.2rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--white);">Konum</h4>
         <div class="footer-map-container">
-          <!-- Google Maps Iframe (İzmir genel görünüm, link ile asıl konuma gider) -->
           <iframe class="footer-map-iframe" src="https://maps.google.com/maps?q=İzmir&t=&z=13&ie=UTF8&iwloc=&output=embed" allowfullscreen="" loading="lazy"></iframe>
           <a href="https://maps.app.goo.gl/mDtV2DbJQ7CznL6n6?g_st=ic" target="_blank" class="footer-map-overlay">
             <i class="fa-solid fa-location-dot" style="margin-right:8px; color:var(--gold);"></i> Haritada Aç
@@ -517,7 +519,7 @@
       </div>
     </div>
     <div class="footer-bottom">
-      &copy; 2026 Nâre Pâtisserie & Kitchen. Tüm hakları saklıdır.
+      &copy; 2024 Nâre Pâtisserie & Kitchen. Tüm hakları saklıdır.
     </div>
   </footer>
 
@@ -555,24 +557,44 @@
       setTimeout(() => t.classList.remove('visible'), 3500);
     }
 
+    /* =====================================================
+       SPA VIEW MANAGER (HASH-BASED ROUTING ENTEGRASYONU)
+    ===================================================== */
     function showView(viewId) {
+      const validViews = ['home', 'menu', 'about', 'admin'];
+      if (!validViews.includes(viewId)) {
+        viewId = 'home';
+      }
+
       document.querySelectorAll('.view, section[id^="view-"]').forEach(v => v.classList.remove('active'));
       document.querySelectorAll('.nav-tabs a').forEach(a => a.classList.remove('active'));
+      
       const target = document.getElementById(`view-${viewId}`);
       if(target) target.classList.add('active');
-      const navLink = document.querySelector(`.nav-tabs a[data-target="${viewId}"]`);
+      
+      // Navigasyon sekmelerini href değerine göre eşler
+      const navLink = document.querySelector(`.nav-tabs a[href="#${viewId}"]`);
       if(navLink) navLink.classList.add('active');
+      
       document.getElementById('nav-tabs').classList.remove('open');
       document.getElementById('nav-toggle').classList.remove('open');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    document.querySelectorAll('.nav-tabs a').forEach(el => {
-      el.addEventListener('click', (e) => { e.preventDefault(); showView(el.dataset.target); });
-    });
+    // Hash tabanlı yönlendirici dinleyicisi
+    function handleRouting() {
+      const hash = window.location.hash.replace('#', '') || 'home';
+      showView(hash);
+    }
 
-    document.getElementById('nav-toggle').addEventListener('click', function() {
-      this.classList.toggle('open'); document.getElementById('nav-tabs').classList.toggle('open');
+    window.addEventListener('hashchange', handleRouting);
+
+    // Mobil menü tıklandığında menünün pürüzsüz kapanması
+    document.querySelectorAll('.nav-tabs a').forEach(el => {
+      el.addEventListener('click', () => {
+        document.getElementById('nav-tabs').classList.remove('open');
+        document.getElementById('nav-toggle').classList.remove('open');
+      });
     });
 
     function initColorPalettes() {
@@ -615,7 +637,6 @@
         activeCropTarget = null;
         if (cropper) { cropper.destroy(); cropper = null; }
         
-        // Aynı dosyayı tekrar seçebilmek için input'u sıfırlıyoruz
         document.getElementById('input-cat-file').value = '';
         document.getElementById('input-prod-file').value = '';
       });
@@ -636,7 +657,6 @@
             imageEl.src = event.target.result;
             document.getElementById('crop-modal').classList.add('active');
             
-            // Eğer ürün (yuvarlak) kırpılacaksa cropper arayüzünü CSS ile yuvarlak gösteriyoruz
             const modalBody = document.getElementById('crop-modal-body');
             if (targetType === 'product') {
               modalBody.classList.add('crop-circle-mode');
@@ -646,11 +666,10 @@
 
             if (cropper) cropper.destroy();
             
-            // Modern, dışarı taşmayan (viewMode: 1) crop ayarları
             cropper = new Cropper(imageEl, {
               aspectRatio: targetType === 'category' ? (800 / 240) : 1,
               viewMode: 1, 
-              dragMode: 'move', // Crop kutusu sabit kalır, resmi sürüklersiniz
+              dragMode: 'move',
               autoCropArea: 0.9,
               guides: true,
               center: true,
@@ -668,7 +687,6 @@
     function performRealCropExport() {
       if (!cropper) return;
       
-      // Çıktı çözünürlükleri: Kategori için 800x240, Ürün (küçük yuvarlak) için yüksek kalite 400x400
       const canvasOpts = activeCropTarget === 'category' ? { width: 800, height: 240 } : { width: 400, height: 400 };
       const croppedCanvas = cropper.getCroppedCanvas(canvasOpts);
 
@@ -996,7 +1014,7 @@
     });
 
     document.getElementById('btn-logout').addEventListener('click', async () => {
-      await sb.auth.signOut(); showToast("Oturum kapatıldı."); showView('home'); evaluateSession();
+      await sb.auth.signOut(); showToast("Oturum kapatıldı."); window.location.hash = 'home'; evaluateSession();
     });
 
     async function evaluateSession() {
@@ -1012,6 +1030,9 @@
     loadPublicData();
     loadAboutContent();
     evaluateSession();
+    
+    // Uygulama yüklendiğinde mevcut URL hash durumunu başlatır
+    handleRouting();
   </script>
 </body>
 </html>
