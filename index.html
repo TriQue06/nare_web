@@ -6,15 +6,22 @@
   <title>Nâre — Tatlı Evi</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <!-- FontAwesome İkonları -->
+  
+  <!-- Modern Fontlar ve İkonlar -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  
+  <!-- Cropper.js (Modern Crop Aracı) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+
   <style>
     /* =====================================================
        DESIGN SYSTEM & BRAND PALETTE
     ===================================================== */
     :root {
       --bg-cream:      #FBF9F6;
-      --bg-card:       #F5F0E9;
+      --bg-card:       #FFFFFF;
       --chocolate:     #2C1A11;
       --choc-soft:     #4A3225;
       --gold:          #C49B66;
@@ -24,14 +31,16 @@
       --danger:        #9E2A2B;
       --success:       #386641;
 
-      --font-serif:   'Georgia', 'Times New Roman', serif;
-      --font-sans:    'Helvetica Neue', 'Arial', sans-serif;
+      --font-serif:   'Playfair Display', 'Georgia', serif;
+      --font-sans:    'Inter', 'Helvetica Neue', sans-serif;
       --font-mono:    'Courier New', monospace;
 
-      --nav-h:        80px;
-      --transition:   0.35s cubic-bezier(0.25, 1, 0.5, 1);
-      --radius:       8px;
+      --nav-h:        85px;
+      --transition:   0.3s ease;
+      --radius:       12px;
       --radius-round: 50%;
+      --shadow-sm:    0 4px 15px rgba(44, 26, 17, 0.05);
+      --shadow-md:    0 10px 30px rgba(44, 26, 17, 0.08);
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -59,17 +68,17 @@
       display: flex; align-items: center; justify-content: space-between;
       padding: 0 clamp(1.5rem, 6vw, 5rem);
       position: sticky; top: 0; z-index: 1000;
-      background: rgba(251, 249, 246, 0.9);
+      background: rgba(251, 249, 246, 0.95);
       backdrop-filter: blur(12px);
     }
     .brand-logo {
       font-family: var(--font-serif);
-      font-size: 2rem; font-weight: 400; letter-spacing: 0.15em;
-      text-transform: uppercase; cursor: pointer;
+      font-size: 2.2rem; font-weight: 600; letter-spacing: 0.1em;
+      text-transform: uppercase; cursor: pointer; color: var(--chocolate);
     }
     .nav-tabs { display: flex; align-items: center; gap: 2.5rem; list-style: none; }
     .nav-tabs a {
-      font-size: 0.8rem; letter-spacing: 0.15em; text-transform: uppercase;
+      font-size: 0.85rem; letter-spacing: 0.15em; text-transform: uppercase;
       color: var(--choc-soft); font-weight: 500; padding-bottom: 4px;
       position: relative; transition: color var(--transition);
     }
@@ -84,23 +93,23 @@
     .admin-badge-tab { display: none; }
     .admin-badge-tab.visible { display: inline-block; }
 
-    .social-icons { display: flex; align-items: center; gap: 1.25rem; }
-    .social-icons a { color: var(--choc-soft); font-size: 1.1rem; transition: color var(--transition), transform var(--transition); }
-    .social-icons a:hover { color: var(--gold); transform: translateY(-2px); }
+    .social-icons { display: flex; align-items: center; gap: 1.5rem; }
+    .social-icons a { color: var(--choc-soft); font-size: 1.2rem; transition: color var(--transition), transform var(--transition); }
+    .social-icons a:hover { color: var(--gold); transform: translateY(-3px); }
 
-    .nav-toggle { display: none; flex-direction: column; gap: 5px; padding: 5px; }
-    .nav-toggle span { display: block; width: 22px; height: 2px; background: var(--chocolate); transition: var(--transition); }
-    .nav-toggle.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .nav-toggle { display: none; flex-direction: column; gap: 6px; padding: 5px; }
+    .nav-toggle span { display: block; width: 24px; height: 2px; background: var(--chocolate); transition: var(--transition); }
+    .nav-toggle.open span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
     .nav-toggle.open span:nth-child(2) { opacity: 0; }
-    .nav-toggle.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+    .nav-toggle.open span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
 
     /* =====================================================
        SPA VIEW MANAGER ANIMATION
     ===================================================== */
-    .view { display: none; animation: fadeInUp 0.5s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
+    .view { display: none; animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
     .view.active { display: block; }
     @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(15px); }
+      from { opacity: 0; transform: translateY(20px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
@@ -108,25 +117,25 @@
        VIEW: HOME (PREMIUM INTERACTIVE LANDING)
     ===================================================== */
     #view-home { padding: 4rem 2rem; max-width: 1200px; margin: 0 auto; text-align: center; }
-    .home-hero-content { padding: 4rem 1rem; }
-    .home-hero-subtitle { font-family: var(--font-serif); font-style: italic; color: var(--gold); font-size: 1.25rem; margin-bottom: 1rem; letter-spacing: 0.05em; }
-    .home-hero-title { font-family: var(--font-serif); font-size: 4rem; font-weight: 300; letter-spacing: 0.1em; text-transform: uppercase; color: var(--chocolate); margin-bottom: 1.5rem; line-height: 1.1; }
-    .home-hero-desc { max-width: 600px; margin: 0 auto 2.5rem auto; color: var(--choc-soft); font-size: 1.1rem; line-height: 1.8; opacity: 0.9; }
+    .home-hero-content { padding: 5rem 1rem; }
+    .home-hero-subtitle { font-family: var(--font-serif); font-style: italic; color: var(--gold); font-size: 1.3rem; margin-bottom: 1rem; letter-spacing: 0.05em; }
+    .home-hero-title { font-family: var(--font-serif); font-size: 4.5rem; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; color: var(--chocolate); margin-bottom: 1.5rem; line-height: 1.1; }
+    .home-hero-desc { max-width: 650px; margin: 0 auto 3rem auto; color: var(--choc-soft); font-size: 1.1rem; line-height: 1.8; opacity: 0.9; }
     
     .home-cta-btn {
-      padding: 1rem 2.5rem; border: 1px solid var(--chocolate); color: var(--chocolate);
+      padding: 1.2rem 3rem; border: 1px solid var(--chocolate); color: var(--chocolate);
       font-size: 0.85rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase;
-      background: transparent; transition: all var(--transition); border-radius: var(--radius);
+      background: transparent; transition: all var(--transition); border-radius: 4px;
     }
-    .home-cta-btn:hover { background: var(--chocolate); color: var(--bg-cream); transform: translateY(-2px); }
+    .home-cta-btn:hover { background: var(--chocolate); color: var(--bg-cream); transform: translateY(-3px); box-shadow: var(--shadow-md); }
 
-    .home-features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2.5rem; margin-top: 6rem; padding-top: 4rem; border-top: 1px solid var(--divider); }
-    .feature-card { background: var(--bg-card); border-radius: var(--radius); overflow: hidden; text-align: left; transition: transform var(--transition); }
-    .feature-card:hover { transform: translateY(-5px); }
-    .feature-card-img { width: 100%; height: 220px; object-fit: cover; }
-    .feature-card-body { padding: 1.75rem; }
-    .feature-card-title { font-family: var(--font-serif); font-size: 1.35rem; margin-bottom: 0.5rem; font-weight: 400; color: var(--chocolate); }
-    .feature-card-text { color: var(--choc-soft); font-size: 0.9rem; line-height: 1.6; opacity: 0.85; }
+    .home-features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2.5rem; margin-top: 5rem; padding-top: 4rem; border-top: 1px solid var(--divider); }
+    .feature-card { background: var(--bg-card); border-radius: var(--radius); overflow: hidden; text-align: left; transition: transform var(--transition); box-shadow: var(--shadow-sm); }
+    .feature-card:hover { transform: translateY(-8px); box-shadow: var(--shadow-md); }
+    .feature-card-img { width: 100%; height: 240px; object-fit: cover; }
+    .feature-card-body { padding: 2rem; }
+    .feature-card-title { font-family: var(--font-serif); font-size: 1.4rem; margin-bottom: 0.7rem; font-weight: 600; color: var(--chocolate); }
+    .feature-card-text { color: var(--choc-soft); font-size: 0.95rem; line-height: 1.6; opacity: 0.85; }
 
     /* =====================================================
        VIEW: PUBLIC MENU (ACCORDION & DUAL-COLUMN SYSTEM)
@@ -141,66 +150,71 @@
 
     .menu-category-accordion {
       border-radius: var(--radius); overflow: hidden; background: var(--bg-card);
-      box-shadow: 0 4px 12px rgba(44, 26, 17, 0.04); margin-bottom: 1rem;
-      transition: transform var(--transition);
+      box-shadow: var(--shadow-sm); margin-bottom: 1rem;
+      transition: transform var(--transition), box-shadow var(--transition);
     }
-    .menu-category-accordion:hover { transform: translateY(-2px); }
+    .menu-category-accordion:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
     
     .accordion-header {
-      width: 100%; height: 110px; position: relative; overflow: hidden;
+      width: 100%; height: 120px; position: relative; overflow: hidden;
       display: flex; align-items: center; justify-content: space-between;
-      padding: 0 2rem; color: var(--white); text-align: left;
+      padding: 0 2.5rem; color: var(--white); text-align: left;
     }
     .accordion-bg-img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
     .accordion-gradient-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; }
     .accordion-title-wrapper { position: relative; z-index: 3; }
-    .accordion-cat-name { font-family: var(--font-serif); font-size: 1.6rem; font-weight: 400; letter-spacing: 0.05em; text-shadow: 0 2px 4px rgba(0,0,0,0.4); }
-    .accordion-chevron { position: relative; z-index: 3; font-size: 1.2rem; transition: transform var(--transition); text-shadow: 0 2px 4px rgba(0,0,0,0.4); }
+    .accordion-cat-name { font-family: var(--font-serif); font-size: 1.8rem; font-weight: 500; letter-spacing: 0.05em; text-shadow: 0 2px 8px rgba(0,0,0,0.5); }
+    .accordion-chevron { position: relative; z-index: 3; font-size: 1.3rem; transition: transform var(--transition); text-shadow: 0 2px 4px rgba(0,0,0,0.4); }
     
     .menu-category-accordion.open .accordion-chevron { transform: rotate(180deg); }
-    .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.4s cubic-bezier(0.25, 1, 0.5, 1); background: var(--white); display: flex; flex-direction: column; }
-    .menu-category-accordion.open .accordion-content { max-height: 2000px; }
+    .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.5s cubic-bezier(0.25, 1, 0.5, 1); background: var(--white); display: flex; flex-direction: column; }
+    .menu-category-accordion.open .accordion-content { max-height: 3000px; }
 
-    .menu-product-row { display: flex; align-items: center; padding: 1.25rem 2rem; border-bottom: 1px solid var(--divider); gap: 1.5rem; transition: background 0.2s; }
+    .menu-product-row { display: flex; align-items: center; padding: 1.5rem 2.5rem; border-bottom: 1px solid var(--divider); gap: 1.5rem; transition: background 0.2s; }
     .menu-product-row:last-child { border-bottom: none; }
     .menu-product-row:hover { background: #FAF8F5; }
     
-    .product-img-circle { width: 64px; height: 64px; border-radius: var(--radius-round); object-fit: cover; flex-shrink: 0; background: var(--bg-card); }
-    .product-details-box { flex: 1; display: flex; flex-direction: column; gap: 0.2rem; }
-    .product-title-group { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
-    .product-row-name { font-weight: 600; font-size: 1.1rem; color: var(--chocolate); }
-    .product-tag-badge { font-size: 0.68rem; font-weight: 700; color: var(--white); padding: 0.15rem 0.6rem; border-radius: 12px; text-transform: uppercase; letter-spacing: 0.04em; display: inline-block; }
-    .product-row-desc { font-size: 0.88rem; color: var(--gray-ink); line-height: 1.4; }
-    .product-row-price { font-family: var(--font-serif); font-weight: 600; color: var(--gold); font-size: 1.05rem; margin-top: 0.1rem; }
+    .product-img-circle { width: 72px; height: 72px; border-radius: var(--radius-round); object-fit: cover; flex-shrink: 0; background: var(--bg-cream); border: 2px solid var(--divider); }
+    .product-details-box { flex: 1; display: flex; flex-direction: column; gap: 0.3rem; }
+    .product-title-group { display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap; }
+    .product-row-name { font-weight: 600; font-size: 1.15rem; color: var(--chocolate); }
+    .product-tag-badge { font-size: 0.65rem; font-weight: 700; color: var(--white); padding: 0.2rem 0.6rem; border-radius: 12px; text-transform: uppercase; letter-spacing: 0.05em; display: inline-block; }
+    .product-row-desc { font-size: 0.9rem; color: var(--gray-ink); line-height: 1.5; }
+    .product-row-price { font-family: var(--font-serif); font-weight: 600; color: var(--gold); font-size: 1.1rem; margin-top: 0.2rem; }
 
     /* =====================================================
-       VIEW: ABOUT (DÜZELTİLDİ - .view SINIFI EKLENDİ)
+       VIEW: ABOUT
     ===================================================== */
-    #view-about { max-width: 750px; margin: 0 auto; padding: 5rem 2rem; }
-    .about-title { font-family: var(--font-serif); font-size: 2.2rem; font-weight: 400; margin-bottom: 2rem; text-align: center; letter-spacing: 0.05em; }
-    .about-md-render { line-height: 1.8; color: var(--choc-soft); font-size: 1.05rem; }
+    #view-about { max-width: 750px; margin: 0 auto; padding: 6rem 2rem; }
+    .about-title { font-family: var(--font-serif); font-size: 2.5rem; font-weight: 500; margin-bottom: 2.5rem; text-align: center; letter-spacing: 0.05em; }
+    .about-md-render { line-height: 1.9; color: var(--choc-soft); font-size: 1.1rem; }
+    .about-md-render h1, .about-md-render h2 { font-family: var(--font-serif); color: var(--chocolate); margin-top: 1.5rem; margin-bottom: 1rem; }
 
     /* =====================================================
-       EKRANI KAPLAYAN CROP MODAL INTERFACE (YENİ - GELİŞMİŞ)
+       EKRANI KAPLAYAN MODERN CROP MODAL INTERFACE (CROPPER.JS)
     ===================================================== */
     .crop-modal-overlay {
       position: fixed; inset: 0; background: rgba(18, 16, 14, 0.95);
       z-index: 3000; display: none; align-items: center; justify-content: center;
-      flex-direction: column; padding: 2rem; animation: modalFade 0.25s ease;
+      flex-direction: column; padding: 2rem; animation: modalFade 0.3s ease;
     }
     .crop-modal-overlay.active { display: flex; }
     .crop-modal-container {
-      background: var(--bg-cream); width: 100%; max-width: 650px;
+      background: var(--bg-cream); width: 100%; max-width: 750px;
       border-radius: var(--radius); overflow: hidden; display: flex; flex-direction: column;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+      box-shadow: 0 25px 60px rgba(0,0,0,0.6);
     }
     .crop-modal-header { padding: 1.2rem 1.5rem; border-bottom: 1px solid var(--divider); display: flex; justify-content: space-between; align-items: center; }
-    .crop-modal-header h4 { font-family: var(--font-serif); font-size: 1.2rem; color: var(--chocolate); }
-    .crop-modal-body {
-      padding: 1.5rem; display: flex; align-items: center; justify-content: center;
-      background: #12100E; position: relative; min-height: 320px;
-    }
+    .crop-modal-header h4 { font-family: var(--font-serif); font-size: 1.3rem; color: var(--chocolate); font-weight: 600; }
     
+    .crop-modal-body {
+      padding: 0; background: #000; position: relative; 
+      height: 450px; width: 100%; display: flex; align-items: center; justify-content: center;
+    }
+    /* Cropper custom styles */
+    .cropper-view-box, .cropper-face { border-radius: 0; }
+    .crop-circle-mode .cropper-view-box, .crop-circle-mode .cropper-face { border-radius: 50%; }
+
     .crop-modal-footer { padding: 1.2rem 1.5rem; border-top: 1px solid var(--divider); display: flex; justify-content: flex-end; gap: 1rem; background: var(--bg-card); }
 
     /* =====================================================
@@ -208,66 +222,111 @@
     ===================================================== */
     #view-admin { max-width: 1200px; margin: 0 auto; padding: 4rem 2rem; }
     .admin-grid { display: grid; grid-template-columns: 1fr; gap: 2.5rem; margin-top: 2rem; }
-    @media (min-width: 900px) { .admin-grid { grid-template-columns: 1.2fr 1.8fr; } }
+    @media (min-width: 900px) { .admin-grid { grid-template-columns: 1fr 1.8fr; } }
     
-    .admin-box { background: var(--bg-card); border: 1px solid var(--divider); padding: 2rem; border-radius: var(--radius); height: fit-content; }
-    .admin-box-title { font-family: var(--font-serif); font-size: 1.25rem; margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--divider); }
+    .admin-box { background: var(--bg-card); border: 1px solid var(--divider); padding: 2rem; border-radius: var(--radius); box-shadow: var(--shadow-sm); height: fit-content; }
+    .admin-box-title { font-family: var(--font-serif); font-size: 1.3rem; font-weight: 600; margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--divider); }
     
-    .color-circles-palette { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.4rem; flex-wrap: wrap; }
-    .color-circle-opt { width: 28px; height: 28px; border-radius: var(--radius-round); border: 2px solid transparent; cursor: pointer; transition: transform 0.2s, border-color 0.2s; }
+    .color-circles-palette { display: flex; align-items: center; gap: 0.6rem; margin-top: 0.4rem; flex-wrap: wrap; }
+    .color-circle-opt { width: 30px; height: 30px; border-radius: var(--radius-round); border: 2px solid transparent; cursor: pointer; transition: transform 0.2s, border-color 0.2s; }
     .color-circle-opt:hover { transform: scale(1.15); }
-    .color-circle-opt.selected { border-color: var(--chocolate); transform: scale(1.1); }
+    .color-circle-opt.selected { border-color: var(--chocolate); transform: scale(1.1); box-shadow: 0 0 0 2px var(--bg-cream), 0 0 0 4px var(--chocolate); }
 
-    .inline-thumb-preview { width: 100%; height: 90px; border-radius: var(--radius); object-fit: cover; margin-top: 0.5rem; display: none; border: 1px solid var(--divider); }
+    .inline-thumb-preview { width: 100%; height: 100px; border-radius: 6px; object-fit: cover; margin-top: 0.5rem; display: none; border: 1px solid var(--divider); box-shadow: var(--shadow-sm); }
     .inline-thumb-preview.active { display: block; }
 
-    .form-group { margin-bottom: 1.25rem; display: flex; flex-direction: column; gap: 0.4rem; }
+    .form-group { margin-bottom: 1.4rem; display: flex; flex-direction: column; gap: 0.5rem; }
     .form-group label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; color: var(--choc-soft); }
-    .form-ctrl { width: 100%; padding: 0.75rem; border: 1px solid var(--divider); background: var(--white); color: var(--chocolate); font-size: 0.9rem; border-radius: var(--radius); transition: border-color var(--transition); }
-    .form-ctrl:focus { border-color: var(--chocolate); }
+    .form-ctrl { width: 100%; padding: 0.8rem; border: 1px solid var(--divider); background: var(--bg-cream); color: var(--chocolate); font-size: 0.95rem; border-radius: 6px; transition: border-color var(--transition), box-shadow var(--transition); }
+    .form-ctrl:focus { border-color: var(--chocolate); box-shadow: 0 0 0 3px rgba(44, 26, 17, 0.1); background: var(--white); }
     
-    .btn { padding: 0.75rem 1.5rem; font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600; border-radius: var(--radius); transition: all var(--transition); display: inline-block; text-align: center; }
+    .btn { padding: 0.8rem 1.8rem; font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600; border-radius: 6px; transition: all var(--transition); display: inline-block; text-align: center; }
     .btn-dark { background: var(--chocolate); color: var(--bg-cream); }
-    .btn-dark:hover { background: var(--choc-soft); }
-    .btn-sm { padding: 0.4rem 0.8rem; font-size: 0.7rem; }
+    .btn-dark:hover { background: var(--choc-soft); transform: translateY(-2px); box-shadow: var(--shadow-sm); }
+    .btn-sm { padding: 0.5rem 1rem; font-size: 0.75rem; }
     .btn-danger { background: var(--danger); color: var(--white); }
     .hidden { display: none !important; }
     
-    .editor-list-item { display: flex; align-items: center; justify-content: space-between; background: var(--white); padding: 0.75rem 1rem; border: 1px solid var(--divider); margin-bottom: 0.5rem; border-radius: var(--radius); gap: 1rem; }
-    .admin-list-thumb { width: 36px; height: 36px; border-radius: var(--radius); object-fit: cover; background: var(--bg-card); }
-    .item-drag-actions { display: flex; align-items: center; gap: 0.4rem; }
-    .item-drag-btn { color: var(--gray-ink); font-size: 0.85rem; padding: 4px; }
+    .editor-list-item { display: flex; align-items: center; justify-content: space-between; background: var(--bg-cream); padding: 1rem; border: 1px solid var(--divider); margin-bottom: 0.6rem; border-radius: 8px; gap: 1rem; transition: transform 0.2s; }
+    .editor-list-item:hover { transform: translateX(4px); border-color: var(--gold); }
+    .admin-list-thumb { width: 44px; height: 44px; border-radius: 6px; object-fit: cover; background: var(--white); border: 1px solid var(--divider); }
+    .item-drag-actions { display: flex; align-items: center; gap: 0.5rem; }
+    .item-drag-btn { color: var(--gray-ink); font-size: 0.9rem; padding: 6px; transition: color 0.2s; }
     .item-drag-btn:hover { color: var(--chocolate); }
+
+    /* =====================================================
+       FOOTER & MAP INTEGRATION (YENİ)
+    ===================================================== */
+    .main-footer {
+      background: var(--chocolate); color: var(--bg-cream);
+      padding: 5rem 2rem 2rem; margin-top: auto;
+    }
+    .footer-grid {
+      max-width: 1200px; margin: 0 auto; display: grid;
+      grid-template-columns: 1.2fr 1fr 1.5fr; gap: 4rem;
+    }
+    .footer-brand h3 { font-family: var(--font-serif); font-size: 2rem; margin-bottom: 1.2rem; color: var(--gold); font-weight: 500; letter-spacing: 0.05em; }
+    .footer-bio { color: rgba(251, 249, 246, 0.85); line-height: 1.9; font-size: 0.95rem; }
+    
+    .footer-contact h4 { font-family: var(--font-sans); font-size: 1.1rem; margin-bottom: 1.2rem; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; color: var(--white); }
+    .footer-contact p { margin-bottom: 0.8rem; color: rgba(251, 249, 246, 0.85); font-size: 0.95rem; display: flex; align-items: center; gap: 10px; }
+    .footer-contact i { color: var(--gold); }
+
+    .footer-map-container {
+      position: relative; border-radius: 8px; overflow: hidden; height: 220px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);
+    }
+    .footer-map-iframe { width: 100%; height: 100%; border: 0; }
+    .footer-map-overlay {
+      position: absolute; inset: 0; background: rgba(44, 26, 17, 0.4);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; transition: opacity var(--transition); text-decoration: none;
+      color: var(--white); font-weight: 600; font-size: 1.1rem; backdrop-filter: blur(3px);
+      letter-spacing: 0.05em;
+    }
+    .footer-map-container:hover .footer-map-overlay { opacity: 1; }
+    
+    .footer-bottom {
+      max-width: 1200px; margin: 4rem auto 0; padding-top: 2rem;
+      border-top: 1px solid rgba(251, 249, 246, 0.1); text-align: center;
+      font-size: 0.85rem; color: rgba(251, 249, 246, 0.5); letter-spacing: 0.05em;
+    }
 
     /* =====================================================
        SECRET ADMIN TRIGGER & FLOATING COMPONENTS
     ===================================================== */
     #secret-lock-container { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 2000; display: flex; flex-direction: column; align-items: flex-end; gap: 1rem; }
-    #lock-trigger { width: 32px; height: 32px; border-radius: 50%; background: transparent; color: var(--gray-ink); opacity: 0.4; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; transition: opacity var(--transition), color var(--transition); }
-    #lock-trigger:hover { opacity: 1; color: var(--chocolate); }
-    #secret-login-modal { display: none; background: var(--white); border: 1px solid var(--chocolate); padding: 1.5rem; box-shadow: 0 10px 30px rgba(0,0,0,0.15); width: 280px; border-radius: var(--radius); animation: modalFade 0.3s ease; }
+    #lock-trigger { width: 36px; height: 36px; border-radius: 50%; background: var(--bg-card); color: var(--gray-ink); box-shadow: var(--shadow-sm); display: flex; align-items: center; justify-content: center; font-size: 0.85rem; transition: all var(--transition); border: 1px solid var(--divider); opacity: 0.5;}
+    #lock-trigger:hover { opacity: 1; color: var(--chocolate); box-shadow: var(--shadow-md); transform: scale(1.05); }
+    #secret-login-modal { display: none; background: var(--white); border: 1px solid var(--chocolate); padding: 2rem; box-shadow: 0 15px 40px rgba(0,0,0,0.2); width: 300px; border-radius: 12px; animation: modalFade 0.3s ease; }
     #secret-login-modal.open { display: block; }
 
     .toast {
       position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(100px);
-      padding: 0.8rem 2rem; background: var(--chocolate); color: var(--white);
-      border-radius: 30px; font-size: 0.85rem; letter-spacing: 0.05em; z-index: 3000;
+      padding: 1rem 2.5rem; background: var(--chocolate); color: var(--white);
+      border-radius: 30px; font-size: 0.9rem; font-weight: 500; letter-spacing: 0.05em; z-index: 3000;
       opacity: 0; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: none;
+      box-shadow: 0 10px 30px rgba(44, 26, 17, 0.3);
     }
     .toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
     .toast.error { background: var(--danger); }
 
-    @keyframes modalFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes modalFade { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
+    @media (max-width: 900px) {
+      .footer-grid { grid-template-columns: 1fr; gap: 3rem; text-align: center; }
+      .footer-contact p { justify-content: center; }
+    }
     @media (max-width: 768px) {
       .nav-toggle { display: flex; }
       .nav-tabs { display: flex; position: fixed; top: var(--nav-h); left: 0; right: 0; bottom: 0; flex-direction: column; align-items: center; justify-content: flex-start; background: rgba(251, 249, 246, 0.98); padding: 4rem 2rem; gap: 2.5rem; transform: translateY(-100%); opacity: 0; transition: transform 0.4s ease, opacity 0.4s ease; z-index: 999; pointer-events: none; }
       .nav-tabs.open { transform: translateY(0); opacity: 1; pointer-events: auto; }
       .social-icons { display: none; }
-      .menu-split-layout { grid-template-columns: 1fr; gap: 2rem; }
+      .menu-split-layout { grid-template-columns: 1fr; gap: 2.5rem; }
       .menu-split-layout::before { display: none; }
       .home-features-grid { grid-template-columns: 1fr; gap: 2rem; margin-top: 3rem; }
-      .home-hero-title { font-size: 2.5rem; }
+      .home-hero-title { font-size: 3rem; }
+      .accordion-header { padding: 0 1.5rem; }
     }
   </style>
 </head>
@@ -275,26 +334,17 @@
 
   <div id="toast" class="toast"></div>
 
-  <!-- CROP FULLSCREEN MODAL INTERFACE (YENİ - AKTİF CANVAS PAN & ZOOM) -->
+  <!-- CROP FULLSCREEN MODAL INTERFACE (CROPPER.JS) -->
   <div class="crop-modal-overlay" id="crop-modal">
     <div class="crop-modal-container">
       <div class="crop-modal-header">
         <h4 id="crop-modal-title">Görseli Hizala ve Kırp</h4>
       </div>
-      <div class="crop-modal-body">
-        <canvas id="crop-canvas" style="background:#12100E; max-width:100%; border-radius:4px; cursor:move; display:block; margin:0 auto;"></canvas>
-      </div>
-      <!-- Zoom Kontrol Sürgüsü -->
-      <div style="padding:1rem 2rem; background:var(--bg-card); display:flex; flex-direction:column; gap:0.5rem; border-top:1px solid var(--divider);">
-        <div style="display:flex; justify-content:space-between; font-size:0.75rem; text-transform:uppercase; font-weight:700; color:var(--choc-soft);">
-          <span>Uzaklaştır / Yakınlaştır</span>
-          <span id="zoom-val">100%</span>
-        </div>
-        <input type="range" id="crop-zoom" min="0.1" max="3" step="0.02" value="1" style="width:100%; cursor:pointer; accent-color:var(--chocolate);" />
-        <p style="font-size:0.75rem; color:var(--gray-ink); text-align:center; margin-top:4px;">Hizalamak için görseli sürükleyin, ölçeklemek için sürgüyü kullanın.</p>
+      <div class="crop-modal-body" id="crop-modal-body">
+        <img id="crop-image-source" src="" style="max-width: 100%; display:block;" />
       </div>
       <div class="crop-modal-footer">
-        <button class="btn btn-secondary btn-sm" id="btn-crop-cancel" style="border:1px solid var(--divider); background:var(--white);">Vazgeç</button>
+        <button class="btn btn-secondary btn-sm" id="btn-crop-cancel" style="border:1px solid var(--divider); background:var(--white); color:var(--chocolate);">Vazgeç</button>
         <button class="btn btn-dark btn-sm" id="btn-crop-confirm">Kırp ve Kaydet</button>
       </div>
     </div>
@@ -310,9 +360,9 @@
       <li><a href="#" data-target="admin" class="admin-badge-tab">Panel</a></li>
     </ul>
     <div class="social-icons">
-      <a href="https://x.com" target="_blank"><i class="fa-brands fa-x-twitter"></i></a>
-      <a href="https://instagram.com" target="_blank"><i class="fa-brands fa-instagram"></i></a>
-      <a href="https://facebook.com" target="_blank"><i class="fa-brands fa-facebook"></i></a>
+      <a href="https://x.com" target="_blank" title="X (Twitter)"><i class="fa-brands fa-x-twitter"></i></a>
+      <a href="https://www.instagram.com/narenarlidere/" target="_blank" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
+      <a href="https://facebook.com" target="_blank" title="Facebook"><i class="fa-brands fa-facebook"></i></a>
     </div>
   </header>
 
@@ -329,7 +379,6 @@
         <button class="home-cta-btn" onclick="showView('menu')">Menüyü Keşfet</button>
       </div>
 
-      <!-- İmza Lezzetler Grid Sistemi -->
       <div class="home-features-grid">
         <div class="feature-card">
           <img src="https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=500" class="feature-card-img" alt="Waffle" />
@@ -365,7 +414,7 @@
       </div>
     </section>
 
-    <!-- VIEW 3: ABOUT (HAKKIMIZDA DÜZELTİLDİ - ARTIK Sadece Kendi Sayfasında Görünür) -->
+    <!-- VIEW 3: ABOUT -->
     <section id="view-about" class="view">
       <h2 class="about-title">Hakkımızda</h2>
       <div id="about-content" class="about-wrapper about-md-render"></div>
@@ -404,14 +453,14 @@
           <div class="admin-box">
             <h3 class="admin-box-title" id="product-form-title">Yeni Ürün Ekle</h3>
             <input type="hidden" id="edit-prod-id" value="" />
-            <div class="product-form-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+            <div class="product-form-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:1.2rem;">
               <div class="form-group"><label>Ürün Adı</label><input type="text" id="prod-name" class="form-ctrl" placeholder="Örn: Berry Bliss" /></div>
               <div class="form-group"><label>Fiyat</label><input type="text" id="prod-price" class="form-ctrl" placeholder="Örn: 240 TL" /></div>
-              <div class="form-group" style="grid-column: 1 / -1;"><label>Ürün Açıklaması / İçindekiler</label><textarea id="prod-desc" class="form-ctrl" style="height:70px; resize:none;"></textarea></div>
+              <div class="form-group" style="grid-column: 1 / -1;"><label>Ürün Açıklaması / İçindekiler</label><textarea id="prod-desc" class="form-ctrl" style="height:80px; resize:none;"></textarea></div>
               <div class="form-group" style="grid-column: 1 / -1;">
                 <label>Ürün Görseli</label>
                 <input type="file" id="input-prod-file" class="form-ctrl" accept="image/*" />
-                <img src="" id="prod-thumb-preview" class="inline-thumb-preview" />
+                <img src="" id="prod-thumb-preview" class="inline-thumb-preview" style="width:100px; height:100px; border-radius:50%;" />
               </div>
               <div class="form-group"><label>Ürün Etiketi (Tag - Opsiyonel)</label><input type="text" id="prod-tag-text" class="form-ctrl" placeholder="Örn: Yeni" /></div>
               <div class="form-group">
@@ -421,30 +470,63 @@
               </div>
               <div class="form-group" style="grid-column: 1 / -1;"><label>Bağlı Olduğu Kategori</label><select id="prod-category-select" class="form-ctrl"></select></div>
             </div>
-            <div style="display:flex; gap:1rem; margin-top:1.5rem;">
+            <div style="display:flex; gap:1rem; margin-top:2rem;">
               <button class="btn btn-dark" id="btn-save-product" style="flex:1;">Ürünü Kaydet</button>
               <button class="btn btn-danger btn-sm hidden" id="btn-cancel-edit">İptal</button>
             </div>
-            <h4 style="margin-top:2.5rem; margin-bottom:1rem; font-size:0.85rem; text-transform:uppercase;">Mevcut Ürün Sıralama Havuzu</h4>
+            <h4 style="margin-top:3rem; margin-bottom:1rem; font-size:0.85rem; text-transform:uppercase; color:var(--chocolate);">Mevcut Ürün Sıralama Havuzu</h4>
             <div id="admin-prod-list-container"></div>
           </div>
 
           <div class="admin-box">
             <h3 class="admin-box-title">Hakkımızda Sayfa Düzenleyicisi</h3>
-            <div class="form-group"><textarea id="admin-about-editor" class="form-ctrl" style="height:200px; font-family:var(--font-mono); resize:vertical;"></textarea></div>
+            <div class="form-group"><textarea id="admin-about-editor" class="form-ctrl" style="height:250px; font-family:var(--font-mono); resize:vertical;"></textarea></div>
             <button class="btn btn-dark" id="btn-save-about" style="width:100%;">Değişiklikleri Kaydet</button>
-            <div id="admin-preview" style="margin-top:1rem; border:1px dashed var(--divider); padding:1rem; background:var(--bg-cream);" class="about-md-render"></div>
+            <div id="admin-preview" style="margin-top:1.5rem; border:1px dashed var(--divider); padding:1.5rem; background:var(--bg-cream); border-radius:8px;" class="about-md-render"></div>
           </div>
         </div>
       </div>
     </section>
   </main>
 
+  <!-- FOOTER & MAPS INTEGRATION -->
+  <footer class="main-footer">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <h3>Nâre Pâtisserie & Kitchen</h3>
+        <p class="footer-bio">
+          Fransız tatlıları • Artizan dokunuşlar<br>
+          Tatlı, tuzlu, dengeli.<br>
+          Her gün taze, her lokma özenli.
+        </p>
+      </div>
+      <div class="footer-contact">
+        <h4>İletişim</h4>
+        <p><i class="fa-solid fa-phone"></i> 0538 687 18 53</p>
+        <p><i class="fa-brands fa-instagram"></i> @narenarlidere</p>
+      </div>
+      <div class="footer-location">
+        <h4 style="font-family:var(--font-sans); font-size:1.1rem; margin-bottom:1.2rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--white);">Konum</h4>
+        <div class="footer-map-container">
+          <!-- Google Maps Iframe (İzmir genel görünüm, link ile asıl konuma gider) -->
+          <iframe class="footer-map-iframe" src="https://maps.google.com/maps?q=İzmir&t=&z=13&ie=UTF8&iwloc=&output=embed" allowfullscreen="" loading="lazy"></iframe>
+          <a href="https://maps.app.goo.gl/mDtV2DbJQ7CznL6n6?g_st=ic" target="_blank" class="footer-map-overlay">
+            <i class="fa-solid fa-location-dot" style="margin-right:8px; color:var(--gold);"></i> Haritada Aç
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      &copy; 2024 Nâre Pâtisserie & Kitchen. Tüm hakları saklıdır.
+    </div>
+  </footer>
+
+  <!-- SECRET ADMIN TRIGGER -->
   <div id="secret-lock-container">
     <div id="secret-login-modal">
       <div class="form-group"><label>E-Posta</label><input type="email" id="login-email" class="form-ctrl" /></div>
       <div class="form-group"><label>Şifre</label><input type="password" id="login-password" class="form-ctrl" /></div>
-      <button class="btn btn-dark btn-sm" id="btn-login" style="width:100%;">Giriş</button>
+      <button class="btn btn-dark btn-sm" id="btn-login" style="width:100%; margin-top:0.5rem;">Giriş Yap</button>
     </div>
     <button id="lock-trigger" aria-label="Yönetici Girişi Panel"><i class="fa-solid fa-lock"></i></button>
   </div>
@@ -459,16 +541,9 @@
     let cacheCategories = [];
     let cacheProducts = [];
     
-    // Gelişmiş Canvas Hizalama/Kırpma Değişkenleri
+    // Cropper.js Değişkenleri
+    let cropper = null;
     let activeCropTarget = null; // 'category' veya 'product'
-    let cropImageObj = null;
-    let zoom = 1.0;
-    let panX = 0;
-    let panY = 0;
-    let isDragging = false;
-    let startX = 0, startY = 0;
-
-    // Supabase'e yüklenecek olan gerçek kırpılmış Blob dosyaları
     let categoryCroppedBlob = null;
     let productCroppedBlob = null;
 
@@ -489,6 +564,7 @@
       if(navLink) navLink.classList.add('active');
       document.getElementById('nav-tabs').classList.remove('open');
       document.getElementById('nav-toggle').classList.remove('open');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     document.querySelectorAll('.nav-tabs a').forEach(el => {
@@ -528,44 +604,24 @@
     }
 
     /* =====================================================
-       FULLSCREEN CANVAS CROP & ALIGN INTERACTIVE ENGINE
+       CROPPER.JS MODERN ENTEGRASYONU
     ===================================================== */
-    const canvas = document.getElementById('crop-canvas');
-    const ctx = canvas.getContext('2d');
-    canvas.width = 600;
-    canvas.height = 400;
-
-    function initFullscreenCropHandlers() {
+    function initCropperHandlers() {
       setupFileInputCropTrigger('input-cat-file', 'category');
       setupFileInputCropTrigger('input-prod-file', 'product');
 
       document.getElementById('btn-crop-cancel').addEventListener('click', () => {
         document.getElementById('crop-modal').classList.remove('active');
         activeCropTarget = null;
-        cropImageObj = null;
+        if (cropper) { cropper.destroy(); cropper = null; }
+        
+        // Aynı dosyayı tekrar seçebilmek için input'u sıfırlıyoruz
+        document.getElementById('input-cat-file').value = '';
+        document.getElementById('input-prod-file').value = '';
       });
 
       document.getElementById('btn-crop-confirm').addEventListener('click', () => {
         performRealCropExport();
-      });
-
-      // Drag events (Mouse)
-      canvas.addEventListener('mousedown', dragStart);
-      canvas.addEventListener('mousemove', dragMove);
-      canvas.addEventListener('mouseup', dragEnd);
-      canvas.addEventListener('mouseleave', dragEnd);
-
-      // Drag events (Mobile Touch)
-      canvas.addEventListener('touchstart', (e) => { e.preventDefault(); dragStart(e); });
-      canvas.addEventListener('touchmove', (e) => { e.preventDefault(); dragMove(e); });
-      canvas.addEventListener('touchend', dragEnd);
-
-      // Zoom slider event listener
-      const zoomSlider = document.getElementById('crop-zoom');
-      zoomSlider.addEventListener('input', (e) => {
-        zoom = parseFloat(e.target.value);
-        document.getElementById('zoom-val').textContent = Math.round(zoom * 100) + "%";
-        drawCropCanvas();
       });
     }
 
@@ -576,141 +632,49 @@
           activeCropTarget = targetType;
           const reader = new FileReader();
           reader.onload = function(event) {
-            cropImageObj = new Image();
-            cropImageObj.onload = function() {
-              // Reset transform state
-              zoom = 1.0;
-              panX = 0;
-              panY = 0;
-              document.getElementById('crop-zoom').value = 1.0;
-              document.getElementById('zoom-val').textContent = "100%";
-              
-              // Open modal and render canvas
-              document.getElementById('crop-modal').classList.add('active');
-              drawCropCanvas();
-            };
-            cropImageObj.src = event.target.result;
+            const imageEl = document.getElementById('crop-image-source');
+            imageEl.src = event.target.result;
+            document.getElementById('crop-modal').classList.add('active');
+            
+            // Eğer ürün (yuvarlak) kırpılacaksa cropper arayüzünü CSS ile yuvarlak gösteriyoruz
+            const modalBody = document.getElementById('crop-modal-body');
+            if (targetType === 'product') {
+              modalBody.classList.add('crop-circle-mode');
+            } else {
+              modalBody.classList.remove('crop-circle-mode');
+            }
+
+            if (cropper) cropper.destroy();
+            
+            // Modern, dışarı taşmayan (viewMode: 1) crop ayarları
+            cropper = new Cropper(imageEl, {
+              aspectRatio: targetType === 'category' ? (800 / 240) : 1,
+              viewMode: 1, 
+              dragMode: 'move', // Crop kutusu sabit kalır, resmi sürüklersiniz
+              autoCropArea: 0.9,
+              guides: true,
+              center: true,
+              highlight: false,
+              cropBoxMovable: false,
+              cropBoxResizable: false,
+              toggleDragModeOnDblclick: false,
+            });
           };
           reader.readAsDataURL(file);
         }
       });
     }
 
-    function getCoords(e) {
-      if (e.touches && e.touches.length > 0) {
-        const rect = canvas.getBoundingClientRect();
-        return {
-          x: e.touches[0].clientX - rect.left,
-          y: e.touches[0].clientY - rect.top
-        };
-      }
-      return { x: e.offsetX, y: e.offsetY };
-    }
-
-    function dragStart(e) {
-      isDragging = true;
-      const coords = getCoords(e);
-      startX = coords.x;
-      startY = coords.y;
-    }
-
-    function dragMove(e) {
-      if (!isDragging || !cropImageObj) return;
-      const coords = getCoords(e);
-      const dx = coords.x - startX;
-      const dy = coords.y - startY;
-      panX += dx;
-      panY += dy;
-      startX = coords.x;
-      startY = coords.y;
-      drawCropCanvas();
-    }
-
-    function dragEnd() {
-      isDragging = false;
-    }
-
-    function drawCropCanvas() {
-      if (!cropImageObj) return;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // 1. Draw image with scale and translate centered at (300, 200)
-      const dw = cropImageObj.width * zoom;
-      const dh = cropImageObj.height * zoom;
-      const dx = 300 - dw / 2 + panX;
-      const dy = 200 - dh / 2 + panY;
-      ctx.drawImage(cropImageObj, dx, dy, dw, dh);
-
-      // 2. Draw darkened overlay
-      ctx.fillStyle = "rgba(18, 16, 14, 0.75)";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      // 3. Clear the mask in the active crop region using destination-out
-      ctx.globalCompositeOperation = 'destination-out';
-      ctx.beginPath();
-      if (activeCropTarget === 'category') {
-        // Center rectangle of size 480x160 (exact accordion banner aspect ratio)
-        ctx.rect(300 - 240, 200 - 80, 480, 160);
-      } else {
-        // Center circle of radius 100 (exact product thumb aspect ratio)
-        ctx.arc(300, 200, 100, 0, Math.PI * 2);
-      }
-      ctx.fill();
-
-      // 4. Restore normal composite to draw white dashed border
-      ctx.globalCompositeOperation = 'source-over';
-      ctx.strokeStyle = "rgba(255, 255, 255, 0.9)";
-      ctx.lineWidth = 2;
-      ctx.setLineDash([6, 4]);
-      ctx.beginPath();
-      if (activeCropTarget === 'category') {
-        ctx.rect(300 - 240, 200 - 80, 480, 160);
-      } else {
-        ctx.arc(300, 200, 100, 0, Math.PI * 2);
-      }
-      ctx.stroke();
-      ctx.setLineDash([]);
-    }
-
-    // High Quality Physical Crop Redraw & Export as Optimized Blob
     function performRealCropExport() {
-      if (!cropImageObj) return;
+      if (!cropper) return;
+      
+      // Çıktı çözünürlükleri: Kategori için 800x240, Ürün (küçük yuvarlak) için yüksek kalite 400x400
+      const canvasOpts = activeCropTarget === 'category' ? { width: 800, height: 240 } : { width: 400, height: 400 };
+      const croppedCanvas = cropper.getCroppedCanvas(canvasOpts);
 
-      const offscreen = document.createElement('canvas');
-      const oCtx = offscreen.getContext('2d');
-
-      if (activeCropTarget === 'category') {
-        offscreen.width = 800;
-        offscreen.height = 240; // High-res wide banner
+      croppedCanvas.toBlob((blob) => {
+        const dataUrl = croppedCanvas.toDataURL('image/jpeg', 0.9);
         
-        // Scale math to map crop zone to offscreen canvas
-        const scaleFactor = 800 / 480;
-        oCtx.scale(scaleFactor, scaleFactor);
-        oCtx.translate(240 - 300, 80 - 200);
-
-        const dw = cropImageObj.width * zoom;
-        const dh = cropImageObj.height * zoom;
-        const dx = 300 - dw / 2 + panX;
-        const dy = 200 - dh / 2 + panY;
-        oCtx.drawImage(cropImageObj, dx, dy, dw, dh);
-      } else {
-        offscreen.width = 200;
-        offscreen.height = 200; // High-res product thumb
-        
-        const scaleFactor = 200 / 200;
-        oCtx.scale(scaleFactor, scaleFactor);
-        oCtx.translate(100 - 300, 100 - 200);
-
-        const dw = cropImageObj.width * zoom;
-        const dh = cropImageObj.height * zoom;
-        const dx = 300 - dw / 2 + panX;
-        const dy = 200 - dh / 2 + panY;
-        oCtx.drawImage(cropImageObj, dx, dy, dw, dh);
-      }
-
-      // Convert offscreen high-res canvas to standard Blob and show thumbnail
-      offscreen.toBlob((blob) => {
-        const dataUrl = offscreen.toDataURL('image/jpeg', 0.9);
         if (activeCropTarget === 'category') {
           categoryCroppedBlob = blob;
           const previewImg = document.getElementById('cat-thumb-preview');
@@ -724,7 +688,10 @@
         }
         
         document.getElementById('crop-modal').classList.remove('active');
-        showToast("Hizalama ve simüle yüksek kaliteli kırpma başarılı.");
+        showToast("Görsel başarıyla kırpıldı ve hizalandı.");
+        
+        cropper.destroy();
+        cropper = null;
       }, 'image/jpeg', 0.9);
     }
 
@@ -760,7 +727,7 @@
         let headerHtml = `
           <button class="accordion-header" onclick="this.parentElement.classList.toggle('open')">
             <img src="${escHtml(cat.image_url || 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600')}" class="accordion-bg-img" alt="${escHtml(cat.name)}" />
-            <div class="accordion-gradient-overlay" style="background: linear-gradient(to right, ${overlayColor}ee 30%, transparent 100%);"></div>
+            <div class="accordion-gradient-overlay" style="background: linear-gradient(to right, ${overlayColor}ea 25%, transparent 100%);"></div>
             <div class="accordion-title-wrapper"><h3 class="accordion-cat-name">${escHtml(cat.name)}</h3></div>
             <i class="fa-solid fa-chevron-down accordion-chevron"></i>
           </button>
@@ -770,7 +737,7 @@
         contentNode.className = 'accordion-content';
 
         if (catProds.length === 0) {
-          contentNode.innerHTML = `<p style="padding:1.5rem 2rem; font-size:0.88rem; color:var(--gray-ink); font-style:italic;">Bu grupta henüz bir lezzet listelenmemiş.</p>`;
+          contentNode.innerHTML = `<p style="padding:1.5rem 2.5rem; font-size:0.9rem; color:var(--gray-ink); font-style:italic;">Bu grupta henüz bir lezzet listelenmemiş.</p>`;
         } else {
           catProds.forEach(p => {
             let tagMarkup = '';
@@ -813,13 +780,11 @@
       const name = document.getElementById('input-cat-name').value.trim();
       const col = document.getElementById('select-cat-col').value;
       const gradientColor = document.getElementById('selected-cat-color').value;
-      const fileEl = document.getElementById('input-cat-file');
 
       if (!name) { showToast("Kategori adı boş olamaz.", true); return; }
 
       try {
         let imageUrl = null;
-        // Kırpılmış olan Blob'u (eğer varsa) Supabase Storage'a yüklüyoruz
         if (categoryCroppedBlob) {
           const filePath = `cat_${Date.now()}.jpg`;
           const { error: uploadErr } = await sb.storage.from('nare-media').upload(filePath, categoryCroppedBlob, {
@@ -838,7 +803,7 @@
 
         showToast("Kategori başarıyla oluşturuldu.");
         document.getElementById('input-cat-name').value = ''; 
-        fileEl.value = '';
+        document.getElementById('input-cat-file').value = '';
         categoryCroppedBlob = null;
         document.getElementById('cat-thumb-preview').classList.remove('active');
         loadPublicData();
@@ -855,9 +820,9 @@
         const tThumb = cat.image_url || 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=100';
         container.innerHTML += `
           <div class="editor-list-item">
-            <div style="display:flex; align-items:center; gap:0.75rem;">
+            <div style="display:flex; align-items:center; gap:1rem;">
               <img src="${tThumb}" class="admin-list-thumb" />
-              <div><strong>${escHtml(cat.name)}</strong><div style="font-size:0.7rem; color:var(--gray-ink);">Sütun: ${cat.column_placement === 'left' ? 'Sol' : 'Sağ'}</div></div>
+              <div><strong style="color:var(--chocolate);">${escHtml(cat.name)}</strong><div style="font-size:0.75rem; color:var(--gray-ink); margin-top:2px;">Sütun: ${cat.column_placement === 'left' ? 'Sol' : 'Sağ'}</div></div>
             </div>
             <div class="item-drag-actions">
               <button class="item-drag-btn" onclick="moveCategory(${cat.id}, 'up')" ${index === 0 ? 'disabled style="opacity:0.2;"' : ''}><i class="fa-solid fa-arrow-up"></i></button>
@@ -879,7 +844,7 @@
         await sb.from('categories').update({ sort_index: c2.sort_index }).eq('id', c1.id);
         await sb.from('categories').update({ sort_index: c1.sort_index }).eq('id', c2.id);
         loadPublicData();
-      } catch(e) { showToast("Sıralama değiştirilemedi."); }
+      } catch(e) { showToast("Sıralama değiştirilemedi.", true); }
     }
 
     async function toggleCategorySide(id, currentSide) {
@@ -901,13 +866,11 @@
       const catSelect = document.getElementById('prod-category-select');
       const categoryId = catSelect.value ? parseInt(catSelect.value) : null;
       const editId = document.getElementById('edit-prod-id').value;
-      const fileEl = document.getElementById('input-prod-file');
 
       if (!name || !price || !categoryId) { showToast("Lütfen isim, fiyat ve bağlı kategori seçiniz.", true); return; }
 
       try {
         let imageUrl = null;
-        // Kırpılmış olan Blob'u (eğer varsa) Supabase Storage'a yüklüyoruz
         if (productCroppedBlob) {
           const filePath = `prod_${Date.now()}.jpg`;
           const { error: uploadErr } = await sb.storage.from('nare-media').upload(filePath, productCroppedBlob, {
@@ -922,11 +885,13 @@
         if (imageUrl) payload.image_url = imageUrl;
 
         if (editId) {
-          await sb.from('products').update(payload).eq('id', editId);
+          const { error } = await sb.from('products').update(payload).eq('id', editId);
+          if (error) throw error;
           showToast("Ürün güncellendi.");
         } else {
           payload.sort_index = cacheProducts.length * 10;
-          await sb.from('products').insert([payload]);
+          const { error } = await sb.from('products').insert([payload]);
+          if (error) throw error;
           showToast("Ürün başarıyla eklendi.");
         }
         resetProductForm(); loadPublicData();
@@ -941,9 +906,9 @@
         const pThumb = p.image_url || 'https://images.unsplash.com/photo-1551024601-bec78aea704b?w=100';
         container.innerHTML += `
           <div class="editor-list-item">
-            <div style="display:flex; align-items:center; gap:0.75rem;">
-              <img src="${pThumb}" class="admin-list-thumb" />
-              <div><strong>${escHtml(p.name)}</strong> — <span>${escHtml(p.price)}</span></div>
+            <div style="display:flex; align-items:center; gap:1rem;">
+              <img src="${pThumb}" class="admin-list-thumb" style="border-radius:50%;" />
+              <div><strong style="color:var(--chocolate);">${escHtml(p.name)}</strong> — <span style="font-family:var(--font-serif);">${escHtml(p.price)}</span></div>
             </div>
             <div class="item-drag-actions">
               <button class="item-drag-btn" onclick="moveProduct(${p.id}, 'up')" ${index === 0 ? 'disabled style="opacity:0.2;"' : ''}><i class="fa-solid fa-arrow-up"></i></button>
@@ -965,7 +930,7 @@
         await sb.from('products').update({ sort_index: p2.sort_index }).eq('id', p1.id);
         await sb.from('products').update({ sort_index: p1.sort_index }).eq('id', p2.id);
         loadPublicData();
-      } catch(e) { }
+      } catch(e) { showToast("Ürün sırası değiştirilemedi.", true); }
     }
 
     function startEditProduct(id) {
@@ -976,7 +941,7 @@
       document.getElementById('prod-desc').value = p.description || '';
       document.getElementById('prod-tag-text').value = p.tag_text || '';
       document.getElementById('selected-tag-color').value = p.tag_color || '';
-      document.getElementById('prod-category-select').value = p.category_id; // Kategori dropdown eşlemesi düzeltildi
+      document.getElementById('prod-category-select').value = p.category_id;
 
       if (p.image_url) {
         const previewImg = document.getElementById('prod-thumb-preview');
@@ -988,6 +953,7 @@
 
       document.getElementById('product-form-title').textContent = "Ürünü Düzenle";
       document.getElementById('btn-cancel-edit').classList.remove('hidden');
+      window.scrollTo({ top: document.getElementById('product-form-title').offsetTop - 100, behavior: 'smooth' });
     }
 
     function resetProductForm() {
@@ -1042,7 +1008,7 @@
     function escHtml(str) { return String(str ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
 
     initColorPalettes();
-    initFullscreenCropHandlers();
+    initCropperHandlers();
     loadPublicData();
     loadAboutContent();
     evaluateSession();
