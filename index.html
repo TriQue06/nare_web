@@ -26,7 +26,7 @@
 
       --font-serif:   'Georgia', 'Times New Roman', serif;
       --font-sans:    'Helvetica Neue', 'Arial', sans-serif;
-      --font-mono:    'Courier New', monospace;
+      --font-mono:    'Courier New', 'Courier', monospace;
 
       --nav-h:        80px;
       --transition:   0.35s cubic-bezier(0.25, 1, 0.5, 1);
@@ -42,7 +42,7 @@
       background: var(--bg-cream);
       color: var(--chocolate);
       font-family: var(--font-sans);
-      line-height: 1.6;
+      line-height: 1.7;
       min-height: 100vh;
       -webkit-font-smoothing: antialiased;
       display: flex;
@@ -111,13 +111,13 @@
     }
 
     /* =====================================================
-       VIEW: HOME (BOMBOŞ ANA SAYFA)
+       VIEW: HOME
     ===================================================== */
     #view-home { text-align: center; padding: 8rem 2rem; }
     .home-hero-title { font-family: var(--font-serif); font-size: 3.5rem; font-weight: 400; letter-spacing: 0.05em; color: var(--chocolate); }
 
     /* =====================================================
-       VIEW: MENU (PC ORTADAN ÇİZGİLİ / MOBİL TEK SÜTUN)
+       VIEW: MENU
     ===================================================== */
     .menu-container {
       max-width: 1200px; margin: 0 auto; padding: 4rem 2rem; position: relative;
@@ -125,7 +125,6 @@
     .menu-split-layout {
       display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; position: relative;
     }
-    /* PC Dikey Estetik Çizgi */
     .menu-split-layout::before {
       content: ''; position: absolute; top: 0; bottom: 0; left: 50%;
       width: 1px; background-color: var(--divider); transform: translateX(-50%);
@@ -164,7 +163,6 @@
     .admin-box { background: var(--bg-card); border: 1px solid var(--divider); padding: 2rem; border-radius: var(--radius); }
     .admin-box-title { font-family: var(--font-serif); font-size: 1.25rem; margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--divider); }
     
-    /* Form Yapıları */
     .form-group { margin-bottom: 1.25rem; display: flex; flex-direction: column; gap: 0.5rem; }
     .form-group label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; color: var(--choc-soft); }
     .form-ctrl {
@@ -182,7 +180,6 @@
     .btn-sm { padding: 0.4rem 0.8rem; font-size: 0.7rem; }
     .btn-danger { background: var(--danger); color: var(--white); }
     
-    /* Gelişmiş Editör Listeleri (Sıralama ve Esneklik) */
     .editor-list-item {
       display: flex; align-items: center; justify-content: space-between;
       background: var(--white); padding: 0.75rem 1rem; border: 1px solid var(--divider);
@@ -192,7 +189,6 @@
     .item-drag-btn { color: var(--gray-ink); font-size: 0.85rem; padding: 4px; }
     .item-drag-btn:hover { color: var(--chocolate); }
 
-    /* About Markdown Düzenleyici */
     .about-edit-area { height: 250px; font-family: var(--font-mono); resize: vertical; }
 
     /* =====================================================
@@ -237,11 +233,14 @@
         z-index: 999; pointer-events: none;
       }
       .nav-tabs.open { transform: translateY(0); opacity: 1; pointer-events: auto; }
-      .social-icons { display: none; } /* Mobilde temiz durması için üst sosyal ikonlar gizlenir */
+      .social-icons { display: none; }
       
-      /* Menü Bölünme İptali (Tek dikey hat düzeni) */
       .menu-split-layout { grid-template-columns: 1fr; gap: 3rem; }
       .menu-split-layout::before { display: none; }
+    }
+    @media (max-width: 540px) {
+      .editor-list-item { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+      .item-drag-actions { width: 100%; justify-content: flex-end; }
     }
   </style>
 </head>
@@ -252,7 +251,7 @@
 
   <!-- =====================================================
        HEADER / NAVIGATION AREA
-  ===================================================== */ -->
+  ===================================================== -->
   <header id="navbar">
     <div class="brand-logo" onclick="showView('home')">Nâre</div>
 
@@ -269,14 +268,14 @@
 
     <div class="social-icons">
       <a href="https://x.com" target="_blank" aria-label="X (Twitter)"><i class="fa-brands fa-x-twitter"></i></a>
-      <a href="https://instagram.com" target="_blank" aria-label="Instagram)"><i class="fa-brands fa-instagram"></i></a>
+      <a href="https://instagram.com" target="_blank" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
       <a href="https://facebook.com" target="_blank" aria-label="Facebook)"><i class="fa-brands fa-facebook"></i></a>
     </div>
   </header>
 
   <!-- =====================================================
        MAIN INTERFACE COMPONENT ROUTER
-  ===================================================== */ -->
+  ===================================================== -->
   <main>
     
     <!-- VIEW 1: HOME -->
@@ -326,15 +325,12 @@
           </div>
           <button class="btn btn-dark" id="btn-add-category" style="width:100%; margin-bottom:2rem;">Kategori Ekle</button>
 
-          <div id="admin-cat-list-container">
-            <!-- Dinamik kategori sıralama ve yönetim listesi -->
-          </div>
+          <div id="admin-cat-list-container"></div>
         </div>
 
         <!-- SAĞ PANEL: ÜRÜN EDİTÖRÜ & HAKKIMIZDA MARKDOWN -->
         <div class="admin-layout-right" style="display:flex; flex-direction:column; gap:2.5rem;">
           
-          <!-- Ürün Ekleme/Düzenleme Kutusu -->
           <div class="admin-box">
             <h3 class="admin-box-title" id="product-form-title">Yeni Ürün Ekle</h3>
             <input type="hidden" id="edit-prod-id" value="" />
@@ -357,11 +353,10 @@
               <button class="btn btn-secondary btn-sm hidden" id="btn-cancel-edit">İptal</button>
             </div>
 
-            <h4 style="margin-top:2rem; margin-bottom:1rem; font-size:0.9rem; text-transform:uppercase; letter-spacing:0.05rem;">Mevcut Ürün Listesi (Sıralama Değiştirilebilir)</h4>
+            <h4 style="margin-top:2rem; margin-bottom:1rem; font-size:0.9rem; text-transform:uppercase; letter-spacing:0.05rem;">Mevcut Ürün Listesi</h4>
             <div id="admin-prod-list-container"></div>
           </div>
 
-          <!-- Hakkımızda Düzenleme Kutusu -->
           <div class="admin-box">
             <h3 class="admin-box-title">Hakkımızda Sayfası İçeriği</h3>
             <div class="form-group">
@@ -380,7 +375,7 @@
 
   <!-- =====================================================
        SECRET ADMIN TRIGGER INTERFACE CONTAINER
-  ===================================================== */ -->
+  ===================================================== -->
   <div id="secret-lock-container">
     <div id="secret-login-modal">
       <div class="form-group">
@@ -399,15 +394,15 @@
 
   <!-- =====================================================
        JAVASCRIPT ARCHITECTURE ENVIRONMENT LOGIC
-  ===================================================== */ -->
+  ===================================================== -->
   <script>
     'use strict';
 
     /* --------------------------------------------------
        SUPABASE CREDENTIALS INITIALIZATION
     -------------------------------------------------- */
-    const SUPABASE_URL = "https://jqwrguaidmjlychbpwvt.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_b-sJtw7Jsrp8XJnsLMEo8w_PkPt3hLh";
+    const SUPABASE_URL = "https://xmjfedgprzjyacrkbzzh.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_kX44mJgJAIjojczGoMp66A_0PH1Ueyv";
     const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let cacheCategories = [];
@@ -433,8 +428,6 @@
       const navLink = document.querySelector(`.nav-tabs a[data-target="${viewId}"]`);
       if(navLink) navLink.classList.add('active');
 
-      // Close mobile overlay views
-      document.getElementById('nav-links')?.classList.remove('open');
       document.getElementById('nav-tabs').classList.remove('open');
       document.getElementById('nav-toggle').classList.remove('open');
     }
@@ -458,12 +451,10 @@
     -------------------------------------------------- */
     async function loadPublicData() {
       try {
-        // Fetch categories rows context sorted by position rank indexes
         const { data: cats, error: err1 } = await sb.from('categories').select('*').order('sort_index', { ascending: true });
         if(err1) throw err1;
         cacheCategories = cats || [];
 
-        // Fetch product rows context sorted by sorting position indexes
         const { data: prods, error: err2 } = await sb.from('products').select('*').order('sort_index', { ascending: true });
         if(err2) throw err2;
         cacheProducts = prods || [];
@@ -482,7 +473,6 @@
       leftCol.innerHTML = '';
       rightCol.innerHTML = '';
 
-      // PC Sütun Dağılım Ayrıştırması
       cacheCategories.forEach(cat => {
         const catProds = cacheProducts.filter(p => p.category_id === cat.id);
         
@@ -556,10 +546,8 @@
       selectDropdown.innerHTML = '';
 
       cacheCategories.forEach((cat, index) => {
-        // Dropdown selection option injection lines
         selectDropdown.innerHTML += `<option value="${cat.id}">${escHtml(cat.name)} (${cat.column_placement === 'left' ? 'Sol' : 'Sağ'})</option>`;
         
-        // Editor panel drag and configure control items markup contexts
         container.innerHTML += `
           <div class="editor-list-item">
             <div>
@@ -620,22 +608,21 @@
     document.getElementById('btn-save-product').addEventListener('click', async () => {
       const name = document.getElementById('prod-name').value.trim();
       const price = document.getElementById('prod-price').value.trim();
-      const categoryId = parseInt(document.getElementById('prod-category-select').value);
+      const selectEl = document.getElementById('prod-category-select');
+      const categoryId = selectEl.value ? parseInt(selectEl.value) : null;
       const editId = document.getElementById('edit-prod-id').value;
 
       if(!name || !price || !categoryId) {
-        showToast("Lütfen tüm alanları doldurun.", true);
+        showToast("Lütfen tüm alanları doldurun ve en az bir kategori seçin.", true);
         return;
       }
 
       try {
         if(editId) {
-          // Update current products
           const { error } = await sb.from('products').update({ name, price, category_id: categoryId }).eq('id', editId);
           if(error) throw error;
           showToast("Ürün güncellendi.");
         } else {
-          // Insert new products rows values context map configuration
           const nextIndex = cacheProducts.length * 10;
           const { error } = await sb.from('products').insert([{ name, price, category_id: categoryId, sort_index: nextIndex }]);
           if(error) throw error;
@@ -775,7 +762,7 @@
 
     async function evaluateSession() {
       const { data: { session } } = await sb.auth.getSession();
-      const adminBadge = document.getElementById('nav-admin-link')?.parentElement || document.querySelector('.admin-badge-tab');
+      const adminBadge = document.querySelector('.admin-badge-tab');
       
       if(session) {
         adminBadge.classList.add('visible');
@@ -784,7 +771,6 @@
       }
     }
 
-    // Auth Change listener stream binding
     sb.auth.onAuthStateChange(() => { evaluateSession(); });
 
     /* ANTI XSS UTILITIES ESCAPING HTML */
@@ -797,7 +783,7 @@
     }
 
     /* --------------------------------------------------
-       INITIALIZE LIFECYCLE
+       INIT
     -------------------------------------------------- */
     loadPublicData();
     loadAboutContent();
