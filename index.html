@@ -6,6 +6,7 @@
   <title>Nâre — Tatlı Evi</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <!-- FontAwesome İkonları -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <style>
     /* =====================================================
@@ -29,7 +30,7 @@
 
       --nav-h:        80px;
       --transition:   0.35s cubic-bezier(0.25, 1, 0.5, 1);
-      --radius:       6px;
+      --radius:       8px;
       --radius-round: 50%;
     }
 
@@ -104,6 +105,30 @@
     }
 
     /* =====================================================
+       VIEW: HOME (PREMIUM INTERACTIVE LANDING)
+    ===================================================== */
+    #view-home { padding: 4rem 2rem; max-width: 1200px; margin: 0 auto; text-align: center; }
+    .home-hero-content { padding: 4rem 1rem; }
+    .home-hero-subtitle { font-family: var(--font-serif); font-style: italic; color: var(--gold); font-size: 1.25rem; margin-bottom: 1rem; letter-spacing: 0.05em; }
+    .home-hero-title { font-family: var(--font-serif); font-size: 4rem; font-weight: 300; letter-spacing: 0.1em; text-transform: uppercase; color: var(--chocolate); margin-bottom: 1.5rem; line-height: 1.1; }
+    .home-hero-desc { max-width: 600px; margin: 0 auto 2.5rem auto; color: var(--choc-soft); font-size: 1.1rem; line-height: 1.8; opacity: 0.9; }
+    
+    .home-cta-btn {
+      padding: 1rem 2.5rem; border: 1px solid var(--chocolate); color: var(--chocolate);
+      font-size: 0.85rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase;
+      background: transparent; transition: all var(--transition); border-radius: var(--radius);
+    }
+    .home-cta-btn:hover { background: var(--chocolate); color: var(--bg-cream); transform: translateY(-2px); }
+
+    .home-features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2.5rem; margin-top: 6rem; padding-top: 4rem; border-top: 1px solid var(--divider); }
+    .feature-card { background: var(--bg-card); border-radius: var(--radius); overflow: hidden; text-align: left; transition: transform var(--transition); }
+    .feature-card:hover { transform: translateY(-5px); }
+    .feature-card-img { width: 100%; height: 220px; object-fit: cover; }
+    .feature-card-body { padding: 1.75rem; }
+    .feature-card-title { font-family: var(--font-serif); font-size: 1.35rem; margin-bottom: 0.5rem; font-weight: 400; color: var(--chocolate); }
+    .feature-card-text { color: var(--choc-soft); font-size: 0.9rem; line-height: 1.6; opacity: 0.85; }
+
+    /* =====================================================
        VIEW: PUBLIC MENU (ACCORDION & DUAL-COLUMN SYSTEM)
     ===================================================== */
     .menu-container { max-width: 1200px; margin: 0 auto; padding: 4rem 2rem; }
@@ -129,8 +154,8 @@
     .accordion-bg-img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
     .accordion-gradient-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; }
     .accordion-title-wrapper { position: relative; z-index: 3; }
-    .accordion-cat-name { font-family: var(--font-serif); font-size: 1.6rem; font-weight: 400; letter-spacing: 0.05em; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
-    .accordion-chevron { position: relative; z-index: 3; font-size: 1.2rem; transition: transform var(--transition); text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+    .accordion-cat-name { font-family: var(--font-serif); font-size: 1.6rem; font-weight: 400; letter-spacing: 0.05em; text-shadow: 0 2px 4px rgba(0,0,0,0.4); }
+    .accordion-chevron { position: relative; z-index: 3; font-size: 1.2rem; transition: transform var(--transition); text-shadow: 0 2px 4px rgba(0,0,0,0.4); }
     
     .menu-category-accordion.open .accordion-chevron { transform: rotate(180deg); }
     .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.4s cubic-bezier(0.25, 1, 0.5, 1); background: var(--white); display: flex; flex-direction: column; }
@@ -149,10 +174,17 @@
     .product-row-price { font-family: var(--font-serif); font-weight: 600; color: var(--gold); font-size: 1.05rem; margin-top: 0.1rem; }
 
     /* =====================================================
-       EKRANI KAPLAYAN CROP MODAL INTERFACE (YENİ)
+       VIEW: ABOUT (DÜZELTİLDİ - .view SINIFI EKLENDİ)
+    ===================================================== */
+    #view-about { max-width: 750px; margin: 0 auto; padding: 5rem 2rem; }
+    .about-title { font-family: var(--font-serif); font-size: 2.2rem; font-weight: 400; margin-bottom: 2rem; text-align: center; letter-spacing: 0.05em; }
+    .about-md-render { line-height: 1.8; color: var(--choc-soft); font-size: 1.05rem; }
+
+    /* =====================================================
+       EKRANI KAPLAYAN CROP MODAL INTERFACE (YENİ - GELİŞMİŞ)
     ===================================================== */
     .crop-modal-overlay {
-      position: fixed; inset: 0; background: rgba(28, 26, 23, 0.95);
+      position: fixed; inset: 0; background: rgba(18, 16, 14, 0.95);
       z-index: 3000; display: none; align-items: center; justify-content: center;
       flex-direction: column; padding: 2rem; animation: modalFade 0.25s ease;
     }
@@ -163,19 +195,11 @@
       box-shadow: 0 20px 50px rgba(0,0,0,0.5);
     }
     .crop-modal-header { padding: 1.2rem 1.5rem; border-bottom: 1px solid var(--divider); display: flex; justify-content: space-between; align-items: center; }
-    .crop-modal-header h4 { font-family: var(--font-serif); font-size: 1.2rem; }
+    .crop-modal-header h4 { font-family: var(--font-serif); font-size: 1.2rem; color: var(--chocolate); }
     .crop-modal-body {
-      padding: 2rem; display: flex; align-items: center; justify-content: center;
-      background: #1C1A17; position: relative; min-height: 320px; max-height: 60vh;
+      padding: 1.5rem; display: flex; align-items: center; justify-content: center;
+      background: #12100E; position: relative; min-height: 320px;
     }
-    .crop-workspace-img { max-width: 100%; max-height: 100%; object-fit: contain; }
-    .crop-box-hud-overlay {
-      position: absolute; border: 2px solid var(--white); box-shadow: 0 0 0 4000px rgba(0,0,0,0.6);
-      pointer-events: none; transition: all 0.2s;
-    }
-    /* Kategori Dikdörtgen Oranı, Ürün Yuvarlak Oranı */
-    .crop-box-hud-overlay.ratio-rect { width: 85%; height: 50%; }
-    .crop-box-hud-overlay.ratio-circle { width: 220px; height: 220px; border-radius: var(--radius-round); }
     
     .crop-modal-footer { padding: 1.2rem 1.5rem; border-top: 1px solid var(--divider); display: flex; justify-content: flex-end; gap: 1rem; background: var(--bg-card); }
 
@@ -224,6 +248,15 @@
     #secret-login-modal { display: none; background: var(--white); border: 1px solid var(--chocolate); padding: 1.5rem; box-shadow: 0 10px 30px rgba(0,0,0,0.15); width: 280px; border-radius: var(--radius); animation: modalFade 0.3s ease; }
     #secret-login-modal.open { display: block; }
 
+    .toast {
+      position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(100px);
+      padding: 0.8rem 2rem; background: var(--chocolate); color: var(--white);
+      border-radius: 30px; font-size: 0.85rem; letter-spacing: 0.05em; z-index: 3000;
+      opacity: 0; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: none;
+    }
+    .toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.error { background: var(--danger); }
+
     @keyframes modalFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
     @media (max-width: 768px) {
@@ -233,6 +266,8 @@
       .social-icons { display: none; }
       .menu-split-layout { grid-template-columns: 1fr; gap: 2rem; }
       .menu-split-layout::before { display: none; }
+      .home-features-grid { grid-template-columns: 1fr; gap: 2rem; margin-top: 3rem; }
+      .home-hero-title { font-size: 2.5rem; }
     }
   </style>
 </head>
@@ -240,18 +275,27 @@
 
   <div id="toast" class="toast"></div>
 
+  <!-- CROP FULLSCREEN MODAL INTERFACE (YENİ - AKTİF CANVAS PAN & ZOOM) -->
   <div class="crop-modal-overlay" id="crop-modal">
     <div class="crop-modal-container">
       <div class="crop-modal-header">
-        <h4 id="crop-modal-title">Görseli Hizala</h4>
+        <h4 id="crop-modal-title">Görseli Hizala ve Kırp</h4>
       </div>
       <div class="crop-modal-body">
-        <img src="" id="crop-workspace" class="crop-workspace-img" alt="Düzenleme Alanı" />
-        <div class="crop-box-hud-overlay" id="crop-hud-box"></div>
+        <canvas id="crop-canvas" style="background:#12100E; max-width:100%; border-radius:4px; cursor:move; display:block; margin:0 auto;"></canvas>
+      </div>
+      <!-- Zoom Kontrol Sürgüsü -->
+      <div style="padding:1rem 2rem; background:var(--bg-card); display:flex; flex-direction:column; gap:0.5rem; border-top:1px solid var(--divider);">
+        <div style="display:flex; justify-content:space-between; font-size:0.75rem; text-transform:uppercase; font-weight:700; color:var(--choc-soft);">
+          <span>Uzaklaştır / Yakınlaştır</span>
+          <span id="zoom-val">100%</span>
+        </div>
+        <input type="range" id="crop-zoom" min="0.1" max="3" step="0.02" value="1" style="width:100%; cursor:pointer; accent-color:var(--chocolate);" />
+        <p style="font-size:0.75rem; color:var(--gray-ink); text-align:center; margin-top:4px;">Hizalamak için görseli sürükleyin, ölçeklemek için sürgüyü kullanın.</p>
       </div>
       <div class="crop-modal-footer">
-        <button class="btn btn-secondary btn-sm" id="btn-crop-cancel" style="border:1px solid var(--divider)">İptal</button>
-        <button class="btn btn-dark btn-sm" id="btn-crop-confirm">Kırpmayı Tamamla</button>
+        <button class="btn btn-secondary btn-sm" id="btn-crop-cancel" style="border:1px solid var(--divider); background:var(--white);">Vazgeç</button>
+        <button class="btn btn-dark btn-sm" id="btn-crop-confirm">Kırp ve Kaydet</button>
       </div>
     </div>
   </div>
@@ -273,19 +317,61 @@
   </header>
 
   <main>
-    <section id="view-home" class="view active"><h1 class="home-hero-title">Nâre</h1></section>
+    <!-- VIEW 1: HOME (LÜKS KARŞILAMA VE TANITIM ALANI) -->
+    <section id="view-home" class="view active">
+      <div class="home-hero-content">
+        <p class="home-hero-subtitle">Modern Geleneksel Tatlıcılık</p>
+        <h1 class="home-hero-title">Nâre Tatlı Evi</h1>
+        <p class="home-hero-desc">
+          Eşsiz reçetelerle taze meyveleri, el yapımı çıtır hamurları ve en kaliteli çikolataları bir araya getiriyoruz. 
+          Nâre dünyasındaki her bir lokma, özenle tasarlanmış bir lezzet yolculuğudur.
+        </p>
+        <button class="home-cta-btn" onclick="showView('menu')">Menüyü Keşfet</button>
+      </div>
 
-    <section id="view-menu" class="view">
-      <div class="menu-container">
-        <div class="menu-split-layout"><div class="menu-column" id="menu-col-left"></div><div class="menu-column" id="menu-col-right"></div></div>
+      <!-- İmza Lezzetler Grid Sistemi -->
+      <div class="home-features-grid">
+        <div class="feature-card">
+          <img src="https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=500" class="feature-card-img" alt="Waffle" />
+          <div class="feature-card-body">
+            <h3 class="feature-card-title">Artisan Waffle'lar</h3>
+            <p class="feature-card-text">Belçika ekolüyle fırından yeni çıkmış sıcacık çıtır hamurlar, taze meyveler ve eritilmiş premium çikolata sosu.</p>
+          </div>
+        </div>
+        <div class="feature-card">
+          <img src="https://images.unsplash.com/photo-1511690656952-34342bb7c2f2?w=500" class="feature-card-img" alt="Healthy Bowls" />
+          <div class="feature-card-body">
+            <h3 class="feature-card-title">Sağlıklı Kaseler</h3>
+            <p class="feature-card-text">Süzme yoğurt, chia tohumu ve yulaf eşliğinde; antioksidan kaynağı taze yaban mersini ve muz dilimleriyle hafif seçenekler.</p>
+          </div>
+        </div>
+        <div class="feature-card">
+          <img src="https://images.unsplash.com/photo-1587314168485-3236d6710814?w=500" class="feature-card-img" alt="Dessert" />
+          <div class="feature-card-body">
+            <h3 class="feature-card-title">Özel Kavanoz Tatlıları</h3>
+            <p class="feature-card-text">Günlük hazırlanan hafif kremalar, ipeksi kadife kıvamı ve kat kat bisküvi çıtırlarıyla sunulan modern lezzetler.</p>
+          </div>
+        </div>
       </div>
     </section>
 
-    <section id="view-about">
+    <!-- VIEW 2: PUBLIC MENU -->
+    <section id="view-menu" class="view">
+      <div class="menu-container">
+        <div class="menu-split-layout">
+          <div class="menu-column" id="menu-col-left"></div>
+          <div class="menu-column" id="menu-col-right"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 3: ABOUT (HAKKIMIZDA DÜZELTİLDİ - ARTIK Sadece Kendi Sayfasında Görünür) -->
+    <section id="view-about" class="view">
       <h2 class="about-title">Hakkımızda</h2>
       <div id="about-content" class="about-wrapper about-md-render"></div>
     </section>
 
+    <!-- VIEW 4: ADMIN CONTROL PANEL -->
     <section id="view-admin" class="view">
       <div class="admin-toolbar" style="display:flex; justify-content:space-between; align-items:center;">
         <h2>Yönetim Paneli</h2>
@@ -360,7 +446,7 @@
       <div class="form-group"><label>Şifre</label><input type="password" id="login-password" class="form-ctrl" /></div>
       <button class="btn btn-dark btn-sm" id="btn-login" style="width:100%;">Giriş</button>
     </div>
-    <button id="lock-trigger"><i class="fa-solid fa-lock"></i></button>
+    <button id="lock-trigger" aria-label="Yönetici Girişi Panel"><i class="fa-solid fa-lock"></i></button>
   </div>
 
   <script>
@@ -372,8 +458,19 @@
 
     let cacheCategories = [];
     let cacheProducts = [];
+    
+    // Gelişmiş Canvas Hizalama/Kırpma Değişkenleri
     let activeCropTarget = null; // 'category' veya 'product'
-    let currentRawFile = null;
+    let cropImageObj = null;
+    let zoom = 1.0;
+    let panX = 0;
+    let panY = 0;
+    let isDragging = false;
+    let startX = 0, startY = 0;
+
+    // Supabase'e yüklenecek olan gerçek kırpılmış Blob dosyaları
+    let categoryCroppedBlob = null;
+    let productCroppedBlob = null;
 
     const PRESET_COLORS = ["#2C1A11", "#C49B66", "#7A306C", "#4F6D7A", "#386641", "#9E2A2B", "#6A4C93", "#D81159"];
 
@@ -431,46 +528,204 @@
     }
 
     /* =====================================================
-       FULLSCREEN CROP INTERACTIVE OVERLAY ENGINE (YENİ)
+       FULLSCREEN CANVAS CROP & ALIGN INTERACTIVE ENGINE
     ===================================================== */
+    const canvas = document.getElementById('crop-canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = 600;
+    canvas.height = 400;
+
     function initFullscreenCropHandlers() {
-      setupFileInputCropTrigger('input-cat-file', 'category', 'ratio-rect');
-      setupFileInputCropTrigger('input-prod-file', 'product', 'ratio-circle');
+      setupFileInputCropTrigger('input-cat-file', 'category');
+      setupFileInputCropTrigger('input-prod-file', 'product');
 
       document.getElementById('btn-crop-cancel').addEventListener('click', () => {
         document.getElementById('crop-modal').classList.remove('active');
-        activeCropTarget = null; currentRawFile = null;
+        activeCropTarget = null;
+        cropImageObj = null;
       });
 
       document.getElementById('btn-crop-confirm').addEventListener('click', () => {
-        // Kırpma alanının simülasyonunu tamamlayıp thumbnail önizlemesini dolduruyoruz
-        const targetPreviewId = activeCropTarget === 'category' ? 'cat-thumb-preview' : 'prod-thumb-preview';
-        const previewImg = document.getElementById(targetPreviewId);
-        
-        previewImg.src = document.getElementById('crop-workspace').src;
-        previewImg.classList.add('active');
-        
-        document.getElementById('crop-modal').classList.remove('active');
-        showToast("Görsel hizalaması ve simüle kırpma başarılı.");
+        performRealCropExport();
+      });
+
+      // Drag events (Mouse)
+      canvas.addEventListener('mousedown', dragStart);
+      canvas.addEventListener('mousemove', dragMove);
+      canvas.addEventListener('mouseup', dragEnd);
+      canvas.addEventListener('mouseleave', dragEnd);
+
+      // Drag events (Mobile Touch)
+      canvas.addEventListener('touchstart', (e) => { e.preventDefault(); dragStart(e); });
+      canvas.addEventListener('touchmove', (e) => { e.preventDefault(); dragMove(e); });
+      canvas.addEventListener('touchend', dragEnd);
+
+      // Zoom slider event listener
+      const zoomSlider = document.getElementById('crop-zoom');
+      zoomSlider.addEventListener('input', (e) => {
+        zoom = parseFloat(e.target.value);
+        document.getElementById('zoom-val').textContent = Math.round(zoom * 100) + "%";
+        drawCropCanvas();
       });
     }
 
-    function setupFileInputCropTrigger(inputId, targetType, hudRatioClass) {
+    function setupFileInputCropTrigger(inputId, targetType) {
       document.getElementById(inputId).addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (file) {
-          currentRawFile = file;
           activeCropTarget = targetType;
           const reader = new FileReader();
           reader.onload = function(event) {
-            document.getElementById('crop-workspace').src = event.target.result;
-            const hudBox = document.getElementById('crop-hud-box');
-            hudBox.className = `crop-box-hud-overlay ${hudRatioClass}`;
-            document.getElementById('crop-modal').classList.add('active');
+            cropImageObj = new Image();
+            cropImageObj.onload = function() {
+              // Reset transform state
+              zoom = 1.0;
+              panX = 0;
+              panY = 0;
+              document.getElementById('crop-zoom').value = 1.0;
+              document.getElementById('zoom-val').textContent = "100%";
+              
+              // Open modal and render canvas
+              document.getElementById('crop-modal').classList.add('active');
+              drawCropCanvas();
+            };
+            cropImageObj.src = event.target.result;
           };
           reader.readAsDataURL(file);
         }
       });
+    }
+
+    function getCoords(e) {
+      if (e.touches && e.touches.length > 0) {
+        const rect = canvas.getBoundingClientRect();
+        return {
+          x: e.touches[0].clientX - rect.left,
+          y: e.touches[0].clientY - rect.top
+        };
+      }
+      return { x: e.offsetX, y: e.offsetY };
+    }
+
+    function dragStart(e) {
+      isDragging = true;
+      const coords = getCoords(e);
+      startX = coords.x;
+      startY = coords.y;
+    }
+
+    function dragMove(e) {
+      if (!isDragging || !cropImageObj) return;
+      const coords = getCoords(e);
+      const dx = coords.x - startX;
+      const dy = coords.y - startY;
+      panX += dx;
+      panY += dy;
+      startX = coords.x;
+      startY = coords.y;
+      drawCropCanvas();
+    }
+
+    function dragEnd() {
+      isDragging = false;
+    }
+
+    function drawCropCanvas() {
+      if (!cropImageObj) return;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // 1. Draw image with scale and translate centered at (300, 200)
+      const dw = cropImageObj.width * zoom;
+      const dh = cropImageObj.height * zoom;
+      const dx = 300 - dw / 2 + panX;
+      const dy = 200 - dh / 2 + panY;
+      ctx.drawImage(cropImageObj, dx, dy, dw, dh);
+
+      // 2. Draw darkened overlay
+      ctx.fillStyle = "rgba(18, 16, 14, 0.75)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // 3. Clear the mask in the active crop region using destination-out
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.beginPath();
+      if (activeCropTarget === 'category') {
+        // Center rectangle of size 480x160 (exact accordion banner aspect ratio)
+        ctx.rect(300 - 240, 200 - 80, 480, 160);
+      } else {
+        // Center circle of radius 100 (exact product thumb aspect ratio)
+        ctx.arc(300, 200, 100, 0, Math.PI * 2);
+      }
+      ctx.fill();
+
+      // 4. Restore normal composite to draw white dashed border
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.9)";
+      ctx.lineWidth = 2;
+      ctx.setLineDash([6, 4]);
+      ctx.beginPath();
+      if (activeCropTarget === 'category') {
+        ctx.rect(300 - 240, 200 - 80, 480, 160);
+      } else {
+        ctx.arc(300, 200, 100, 0, Math.PI * 2);
+      }
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    // High Quality Physical Crop Redraw & Export as Optimized Blob
+    function performRealCropExport() {
+      if (!cropImageObj) return;
+
+      const offscreen = document.createElement('canvas');
+      const oCtx = offscreen.getContext('2d');
+
+      if (activeCropTarget === 'category') {
+        offscreen.width = 800;
+        offscreen.height = 240; // High-res wide banner
+        
+        // Scale math to map crop zone to offscreen canvas
+        const scaleFactor = 800 / 480;
+        oCtx.scale(scaleFactor, scaleFactor);
+        oCtx.translate(240 - 300, 80 - 200);
+
+        const dw = cropImageObj.width * zoom;
+        const dh = cropImageObj.height * zoom;
+        const dx = 300 - dw / 2 + panX;
+        const dy = 200 - dh / 2 + panY;
+        oCtx.drawImage(cropImageObj, dx, dy, dw, dh);
+      } else {
+        offscreen.width = 200;
+        offscreen.height = 200; // High-res product thumb
+        
+        const scaleFactor = 200 / 200;
+        oCtx.scale(scaleFactor, scaleFactor);
+        oCtx.translate(100 - 300, 100 - 200);
+
+        const dw = cropImageObj.width * zoom;
+        const dh = cropImageObj.height * zoom;
+        const dx = 300 - dw / 2 + panX;
+        const dy = 200 - dh / 2 + panY;
+        oCtx.drawImage(cropImageObj, dx, dy, dw, dh);
+      }
+
+      // Convert offscreen high-res canvas to standard Blob and show thumbnail
+      offscreen.toBlob((blob) => {
+        const dataUrl = offscreen.toDataURL('image/jpeg', 0.9);
+        if (activeCropTarget === 'category') {
+          categoryCroppedBlob = blob;
+          const previewImg = document.getElementById('cat-thumb-preview');
+          previewImg.src = dataUrl;
+          previewImg.classList.add('active');
+        } else {
+          productCroppedBlob = blob;
+          const previewImg = document.getElementById('prod-thumb-preview');
+          previewImg.src = dataUrl;
+          previewImg.classList.add('active');
+        }
+        
+        document.getElementById('crop-modal').classList.remove('active');
+        showToast("Hizalama ve simüle yüksek kaliteli kırpma başarılı.");
+      }, 'image/jpeg', 0.9);
     }
 
     /* --------------------------------------------------
@@ -515,7 +770,7 @@
         contentNode.className = 'accordion-content';
 
         if (catProds.length === 0) {
-          contentNode.innerHTML = `<p style="padding:1.5rem 2rem; font-size:0.88rem; color:var(--gray-ink); font-style:italic;">Bu grupta henüz bir ürün listelenmemiş.</p>`;
+          contentNode.innerHTML = `<p style="padding:1.5rem 2rem; font-size:0.88rem; color:var(--gray-ink); font-style:italic;">Bu grupta henüz bir lezzet listelenmemiş.</p>`;
         } else {
           catProds.forEach(p => {
             let tagMarkup = '';
@@ -525,7 +780,7 @@
             }
             contentNode.innerHTML += `
               <div class="menu-product-row">
-                <img src="${escHtml(p.image_url || 'https://images.unsplash.com/photo-1551024601-bec78aea704b?w=150')}" class="product-img-circle" alt="${escHtml(p.name)}" />
+                <img src="${escHtml(p.image_url || 'https://images.unsplash.com/photo-1551024601-bec78aea704b?w=150')}" class="product-img-circle" alt="${escHtml(p.name)}" onerror="this.src='https://images.unsplash.com/photo-1551024601-bec78aea704b?w=150'" />
                 <div class="product-details-box">
                   <div class="product-title-group"><span class="product-row-name">${escHtml(p.name)}</span>${tagMarkup}</div>
                   <p class="product-row-desc">${escHtml(p.description || '')}</p>
@@ -559,16 +814,17 @@
       const col = document.getElementById('select-cat-col').value;
       const gradientColor = document.getElementById('selected-cat-color').value;
       const fileEl = document.getElementById('input-cat-file');
-      const file = fileEl.files[0];
 
       if (!name) { showToast("Kategori adı boş olamaz.", true); return; }
 
       try {
         let imageUrl = null;
-        if (file) {
-          const ext = file.name.split('.').pop();
-          const filePath = `cat_${Date.now()}.${ext}`;
-          const { error: uploadErr } = await sb.storage.from('nare-media').upload(filePath, file);
+        // Kırpılmış olan Blob'u (eğer varsa) Supabase Storage'a yüklüyoruz
+        if (categoryCroppedBlob) {
+          const filePath = `cat_${Date.now()}.jpg`;
+          const { error: uploadErr } = await sb.storage.from('nare-media').upload(filePath, categoryCroppedBlob, {
+            contentType: 'image/jpeg'
+          });
           if (uploadErr) throw uploadErr;
           const { data: urlData } = sb.storage.from('nare-media').getPublicUrl(filePath);
           imageUrl = urlData.publicUrl;
@@ -581,7 +837,9 @@
         if (error) throw error;
 
         showToast("Kategori başarıyla oluşturuldu.");
-        document.getElementById('input-cat-name').value = ''; fileEl.value = '';
+        document.getElementById('input-cat-name').value = ''; 
+        fileEl.value = '';
+        categoryCroppedBlob = null;
         document.getElementById('cat-thumb-preview').classList.remove('active');
         loadPublicData();
       } catch (err) { showToast("Kategori eklenemedi: " + err.message, true); }
@@ -621,7 +879,7 @@
         await sb.from('categories').update({ sort_index: c2.sort_index }).eq('id', c1.id);
         await sb.from('categories').update({ sort_index: c1.sort_index }).eq('id', c2.id);
         loadPublicData();
-      } catch(e) { showToast("Hata oluştu."); }
+      } catch(e) { showToast("Sıralama değiştirilemedi."); }
     }
 
     async function toggleCategorySide(id, currentSide) {
@@ -630,7 +888,7 @@
     }
 
     async function deleteCategory(id) {
-      if(!confirm("Kategoriyi silmek istediğinize emin misiniz?")) return;
+      if(!confirm("Kategoriyi silmek istediğinize emin misiniz? Altındaki tüm ürünler silinecektir.")) return;
       try { await sb.from('categories').delete().eq('id', id); loadPublicData(); } catch(e) { }
     }
 
@@ -644,16 +902,17 @@
       const categoryId = catSelect.value ? parseInt(catSelect.value) : null;
       const editId = document.getElementById('edit-prod-id').value;
       const fileEl = document.getElementById('input-prod-file');
-      const file = fileEl.files[0];
 
-      if (!name || !price || !categoryId) { showToast("Lütfen gerekli alanları doldurunuz.", true); return; }
+      if (!name || !price || !categoryId) { showToast("Lütfen isim, fiyat ve bağlı kategori seçiniz.", true); return; }
 
       try {
         let imageUrl = null;
-        if (file) {
-          const ext = file.name.split('.').pop();
-          const filePath = `prod_${Date.now()}.${ext}`;
-          const { error: uploadErr } = await sb.storage.from('nare-media').upload(filePath, file);
+        // Kırpılmış olan Blob'u (eğer varsa) Supabase Storage'a yüklüyoruz
+        if (productCroppedBlob) {
+          const filePath = `prod_${Date.now()}.jpg`;
+          const { error: uploadErr } = await sb.storage.from('nare-media').upload(filePath, productCroppedBlob, {
+            contentType: 'image/jpeg'
+          });
           if (uploadErr) throw uploadErr;
           const { data: urlData } = sb.storage.from('nare-media').getPublicUrl(filePath);
           imageUrl = urlData.publicUrl;
@@ -671,7 +930,7 @@
           showToast("Ürün başarıyla eklendi.");
         }
         resetProductForm(); loadPublicData();
-      } catch (err) { showToast("Hata oluştu.", true); }
+      } catch (err) { showToast("Kayıt sırasında hata oluştu: " + err.message, true); }
     });
 
     function renderAdminProductEditor() {
@@ -717,6 +976,16 @@
       document.getElementById('prod-desc').value = p.description || '';
       document.getElementById('prod-tag-text').value = p.tag_text || '';
       document.getElementById('selected-tag-color').value = p.tag_color || '';
+      document.getElementById('prod-category-select').value = p.category_id; // Kategori dropdown eşlemesi düzeltildi
+
+      if (p.image_url) {
+        const previewImg = document.getElementById('prod-thumb-preview');
+        previewImg.src = p.image_url;
+        previewImg.classList.add('active');
+      } else {
+        document.getElementById('prod-thumb-preview').classList.remove('active');
+      }
+
       document.getElementById('product-form-title').textContent = "Ürünü Düzenle";
       document.getElementById('btn-cancel-edit').classList.remove('hidden');
     }
@@ -725,6 +994,7 @@
       document.getElementById('edit-prod-id').value = ''; document.getElementById('prod-name').value = '';
       document.getElementById('prod-price').value = ''; document.getElementById('prod-desc').value = '';
       document.getElementById('prod-tag-text').value = ''; document.getElementById('input-prod-file').value = '';
+      productCroppedBlob = null;
       document.getElementById('prod-thumb-preview').classList.remove('active');
       document.getElementById('product-form-title').textContent = "Yeni Ürün Ekle";
       document.getElementById('btn-cancel-edit').classList.add('hidden');
@@ -741,7 +1011,7 @@
       try {
         await sb.from('content').upsert({ key: 'about_page', value: val }, { onConflict: 'key' });
         showToast("Hakkımızda sayfası güncellendi."); loadAboutContent();
-      } catch(err) { showToast("Hata."); }
+      } catch(err) { showToast("Kayıt hatası oluştu.", true); }
     });
 
     const lockBtn = document.getElementById('lock-trigger');
