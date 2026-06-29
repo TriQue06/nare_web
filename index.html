@@ -6,11 +6,10 @@
   <title>Nâre — Tatlı Evi</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <!-- FontAwesome İkonları için CDN -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <style>
     /* =====================================================
-       DESIGN SYSTEM & COLOR PALETTE
+       DESIGN SYSTEM & BRAND PALETTE
     ===================================================== */
     :root {
       --bg-cream:      #FBF9F6;
@@ -26,11 +25,12 @@
 
       --font-serif:   'Georgia', 'Times New Roman', serif;
       --font-sans:    'Helvetica Neue', 'Arial', sans-serif;
-      --font-mono:    'Courier New', 'Courier', monospace;
+      --font-mono:    'Courier New', monospace;
 
       --nav-h:        80px;
       --transition:   0.35s cubic-bezier(0.25, 1, 0.5, 1);
-      --radius:       4px;
+      --radius:       6px;
+      --radius-round: 50%;
     }
 
     /* =====================================================
@@ -42,7 +42,7 @@
       background: var(--bg-cream);
       color: var(--chocolate);
       font-family: var(--font-sans);
-      line-height: 1.7;
+      line-height: 1.6;
       min-height: 100vh;
       -webkit-font-smoothing: antialiased;
       display: flex;
@@ -67,7 +67,7 @@
     .brand-logo {
       font-family: var(--font-serif);
       font-size: 2rem; font-weight: 400; letter-spacing: 0.15em;
-      text-transform: uppercase;
+      text-transform: uppercase; cursor: pointer;
     }
     .nav-tabs {
       display: flex; align-items: center; gap: 2.5rem; list-style: none;
@@ -117,54 +117,120 @@
     .home-hero-title { font-family: var(--font-serif); font-size: 3.5rem; font-weight: 400; letter-spacing: 0.05em; color: var(--chocolate); }
 
     /* =====================================================
-       VIEW: MENU
+       VIEW: PUBLIC MENU (ACCORDION & DUAL-COLUMN SYSTEM)
     ===================================================== */
-    .menu-container {
-      max-width: 1200px; margin: 0 auto; padding: 4rem 2rem; position: relative;
-    }
-    .menu-split-layout {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; position: relative;
-    }
+    .menu-container { max-width: 1200px; margin: 0 auto; padding: 4rem 2rem; }
+    .menu-split-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; position: relative; }
+    /* PC Dikey Estetik Çizgi */
     .menu-split-layout::before {
       content: ''; position: absolute; top: 0; bottom: 0; left: 50%;
       width: 1px; background-color: var(--divider); transform: translateX(-50%);
     }
-    .menu-column { display: flex; flex-direction: column; gap: 3rem; }
-    .menu-category-block { display: flex; flex-direction: column; gap: 1.5rem; }
-    .menu-cat-title {
-      font-family: var(--font-serif); font-size: 1.6rem; font-weight: 400;
-      color: var(--chocolate); border-bottom: 1px solid var(--divider); padding-bottom: 0.5rem;
-      letter-spacing: 0.05em;
+    .menu-column { display: flex; flex-direction: column; gap: 2rem; }
+
+    /* Akordeon Kategori Başlık Kartı */
+    .menu-category-accordion {
+      border-radius: var(--radius); overflow: hidden; background: var(--bg-card);
+      box-shadow: 0 4px 12px rgba(44, 26, 17, 0.04); margin-bottom: 1rem;
+      transition: transform var(--transition);
     }
-    .menu-item-row {
-      display: flex; justify-content: space-between; align-items: baseline; gap: 1rem;
+    .menu-category-accordion:hover { transform: translateY(-2px); }
+    
+    .accordion-header {
+      width: 100%; height: 110px; position: relative; overflow: hidden;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2rem; color: var(--white); text-align: left;
     }
-    .menu-item-name { font-weight: 500; font-size: 1.05rem; color: var(--chocolate); }
-    .menu-item-dots { flex: 1; border-bottom: 1px dotted var(--gray-ink); opacity: 0.4; position: relative; top: -4px; }
-    .menu-item-price { font-family: var(--font-serif); font-weight: 600; color: var(--choc-soft); }
+    .accordion-bg-img {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      object-fit: cover; z-index: 1;
+    }
+    .accordion-gradient-overlay {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2;
+    }
+    .accordion-title-wrapper { position: relative; z-index: 3; }
+    .accordion-cat-name { font-family: var(--font-serif); font-size: 1.6rem; font-weight: 400; letter-spacing: 0.05em; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+    .accordion-chevron { position: relative; z-index: 3; font-size: 1.2rem; transition: transform var(--transition); text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+    
+    /* Akordeon Açık Durumu */
+    .menu-category-accordion.open .accordion-chevron { transform: rotate(180deg); }
+
+    /* Akordeon Alt Ürün İçerik Alanı */
+    .accordion-content {
+      max-height: 0; overflow: hidden; transition: max-height 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+      background: var(--white); display: flex; flex-direction: column;
+    }
+    .menu-category-accordion.open .accordion-content { max-height: 1500px; /* Dinamik genişleme limiti */ }
+
+    /* Ürün Yatay Kart Satırı */
+    .menu-product-row {
+      display: flex; align-items: center; padding: 1.25rem 2rem;
+      border-bottom: 1px solid var(--divider); gap: 1.5rem; transition: background 0.2s;
+    }
+    .menu-product-row:last-child { border-bottom: none; }
+    .menu-product-row:hover { background: #FAF8F5; }
+    
+    .product-img-circle {
+      width: 64px; height: 64px; border-radius: var(--radius-round);
+      object-fit: cover; flex-shrink: 0; background: var(--bg-card);
+    }
+    .product-details-box { flex: 1; display: flex; flex-direction: column; gap: 0.2rem; }
+    .product-title-group { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+    .product-row-name { font-weight: 600; font-size: 1.1rem; color: var(--chocolate); }
+    
+    /* Opsiyonel Dinamik Yuvarlak Tag Etiketi */
+    .product-tag-badge {
+      font-size: 0.68rem; font-weight: 700; color: var(--white);
+      padding: 0.15rem 0.6rem; border-radius: 12px; text-transform: uppercase;
+      letter-spacing: 0.04em; display: inline-block;
+    }
+
+    .product-row-desc { font-size: 0.88rem; color: var(--gray-ink); line-height: 1.4; }
+    .product-row-price { font-family: var(--font-serif); font-weight: 600; color: var(--gold); font-size: 1.05rem; margin-top: 0.1rem; }
 
     /* =====================================================
        VIEW: ABOUT
     ===================================================== */
     #view-about { max-width: 750px; margin: 0 auto; padding: 5rem 2rem; }
-    .about-title {
-      font-family: var(--font-serif); font-size: 2.2rem; font-weight: 400;
-      margin-bottom: 2rem; text-align: center; letter-spacing: 0.05em;
-    }
+    .about-title { font-family: var(--font-serif); font-size: 2.2rem; font-weight: 400; margin-bottom: 2rem; text-align: center; letter-spacing: 0.05em; }
     .about-md-render { line-height: 1.8; color: var(--choc-soft); font-size: 1.05rem; }
 
     /* =====================================================
-       VIEW: ADMIN DASHBOARD / EDITORS
+       VIEW: ADMIN DASHBOARD CONTROL PANEL
     ===================================================== */
-    #view-admin { max-width: 1100px; margin: 0 auto; padding: 4rem 2rem; }
+    #view-admin { max-width: 1200px; margin: 0 auto; padding: 4rem 2rem; }
     .admin-grid { display: grid; grid-template-columns: 1fr; gap: 2.5rem; margin-top: 2rem; }
-    @media (min-width: 850px) { .admin-grid { grid-template-columns: 1.2fr 1.8fr; } }
+    @media (min-width: 900px) { .admin-grid { grid-template-columns: 1.2fr 1.8fr; } }
     
-    .admin-box { background: var(--bg-card); border: 1px solid var(--divider); padding: 2rem; border-radius: var(--radius); }
+    .admin-box { background: var(--bg-card); border: 1px solid var(--divider); padding: 2rem; border-radius: var(--radius); height: fit-content; }
     .admin-box-title { font-family: var(--font-serif); font-size: 1.25rem; margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--divider); }
     
-    .form-group { margin-bottom: 1.25rem; display: flex; flex-direction: column; gap: 0.5rem; }
-    .form-group label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; color: var(--choc-soft); }
+    /* Özel 8 Renk Çemberi Seçim Arayüzü (No Color Picker) */
+    .color-circles-palette { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.4rem; flex-wrap: wrap; }
+    .color-circle-opt {
+      width: 28px; height: 28px; border-radius: var(--radius-round);
+      border: 2px solid transparent; cursor: pointer; transition: transform 0.2s, border-color 0.2s;
+    }
+    .color-circle-opt:hover { transform: scale(1.15); }
+    .color-circle-opt.selected { border-color: var(--chocolate); transform: scale(1.1); }
+
+    /* İnteraktif Görsel Kırpma / Önizleme Modülü (Cropper UX) */
+    .crop-preview-wrapper {
+      width: 100%; height: 140px; border: 1px dashed var(--gray-ink); border-radius: var(--radius);
+      margin-top: 0.5rem; position: relative; overflow: hidden; display: none; background: #EAE3D8;
+    }
+    .crop-preview-wrapper.active { display: flex; align-items: center; justify-content: center; }
+    .crop-simulated-img { width: 100%; height: 100%; object-fit: cover; }
+    .crop-overlay-hud {
+      position: absolute; inset: 10px; border: 2px solid var(--white);
+      box-shadow: 0 0 0 2000px rgba(0,0,0,0.4); pointer-events: none;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .crop-overlay-hud::after { content: 'KIRPMA ALANI'; font-size: 0.65rem; font-weight: 700; color: var(--white); letter-spacing: 0.1em; opacity: 0.7; }
+
+    /* Form Yapıları */
+    .form-group { margin-bottom: 1.25rem; display: flex; flex-direction: column; gap: 0.4rem; }
+    .form-group label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; color: var(--choc-soft); }
     .form-ctrl {
       width: 100%; padding: 0.75rem; border: 1px solid var(--divider); background: var(--white);
       color: var(--chocolate); font-size: 0.9rem; border-radius: var(--radius); transition: border-color var(--transition);
@@ -179,24 +245,24 @@
     .btn-dark:hover { background: var(--choc-soft); }
     .btn-sm { padding: 0.4rem 0.8rem; font-size: 0.7rem; }
     .btn-danger { background: var(--danger); color: var(--white); }
+    .hidden { display: none !important; }
     
     .editor-list-item {
       display: flex; align-items: center; justify-content: space-between;
       background: var(--white); padding: 0.75rem 1rem; border: 1px solid var(--divider);
       margin-bottom: 0.5rem; border-radius: var(--radius); gap: 1rem;
     }
+    .admin-list-thumb { width: 36px; height: 36px; border-radius: var(--radius); object-fit: cover; background: var(--bg-card); }
     .item-drag-actions { display: flex; align-items: center; gap: 0.4rem; }
     .item-drag-btn { color: var(--gray-ink); font-size: 0.85rem; padding: 4px; }
     .item-drag-btn:hover { color: var(--chocolate); }
 
-    .about-edit-area { height: 250px; font-family: var(--font-mono); resize: vertical; }
+    .about-edit-area { height: 200px; font-family: var(--font-mono); resize: vertical; }
 
     /* =====================================================
-       SECRET ADMIN LOGIN TRIGGER & TOAST
+       SECRET ADMIN TRIGGER & TOAST ALERT INFRASTRUCTURE
     ===================================================== */
-    #secret-lock-container {
-      position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 2000; display: flex; flex-direction: column; align-items: flex-end; gap: 1rem;
-    }
+    #secret-lock-container { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 2000; display: flex; flex-direction: column; align-items: flex-end; gap: 1rem; }
     #lock-trigger {
       width: 32px; height: 32px; border-radius: 50%; background: transparent;
       color: var(--gray-ink); opacity: 0.4; display: flex; align-items: center; justify-content: center;
@@ -206,22 +272,14 @@
     
     #secret-login-modal {
       display: none; background: var(--white); border: 1px solid var(--chocolate);
-      padding: 1.5rem; box-shadow: var(--shadow-hover); width: 280px; border-radius: var(--radius);
-      animation: fadeInUp 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+      padding: 1.5rem; box-shadow: 0 10px 30px rgba(0,0,0,0.15); width: 280px; border-radius: var(--radius);
+      animation: modalFade 0.3s cubic-bezier(0.25, 1, 0.5, 1);
     }
     #secret-login-modal.open { display: block; }
-
-    .toast {
-      position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(100px);
-      padding: 0.8rem 2rem; background: var(--chocolate); color: var(--white);
-      border-radius: 30px; font-size: 0.85rem; letter-spacing: 0.05em; z-index: 3000;
-      opacity: 0; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: none;
-    }
-    .toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
-    .toast.error { background: var(--danger); }
+    @keyframes modalFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
     /* =====================================================
-       MOBILE INTERFACE & MEDIA QUERIES
+       MOBILE COMPATIBILITY INTERFACE & MEDIA QUERIES
     ===================================================== */
     @media (max-width: 768px) {
       .nav-toggle { display: flex; }
@@ -235,23 +293,23 @@
       .nav-tabs.open { transform: translateY(0); opacity: 1; pointer-events: auto; }
       .social-icons { display: none; }
       
-      .menu-split-layout { grid-template-columns: 1fr; gap: 3rem; }
+      .menu-split-layout { grid-template-columns: 1fr; gap: 2rem; }
       .menu-split-layout::before { display: none; }
+      .accordion-header { padding: 0 1.25rem; height: 95px; }
+      .menu-product-row { padding: 1rem 1.25rem; gap: 1rem; }
     }
     @media (max-width: 540px) {
-      .editor-list-item { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
-      .item-drag-actions { width: 100%; justify-content: flex-end; }
+      .editor-list-item { flex-direction: column; align-items: flex-start; gap: 0.6rem; padding: 1rem; }
+      .item-drag-actions { width: 100%; justify-content: flex-end; border-top: 1px solid var(--divider); padding-top: 0.5rem; }
+      .product-form-grid { grid-template-columns: 1fr !important; }
+      .admin-toolbar { flex-direction: column; align-items: flex-start; gap: 1rem; }
     }
   </style>
 </head>
 <body>
 
-  <!-- TOAST ALERTS MESSAGE -->
   <div id="toast" class="toast"></div>
 
-  <!-- =====================================================
-       HEADER / NAVIGATION AREA
-  ===================================================== -->
   <header id="navbar">
     <div class="brand-logo" onclick="showView('home')">Nâre</div>
 
@@ -273,94 +331,127 @@
     </div>
   </header>
 
-  <!-- =====================================================
-       MAIN INTERFACE COMPONENT ROUTER
-  ===================================================== -->
   <main>
     
-    <!-- VIEW 1: HOME -->
     <section id="view-home" class="view active">
       <h1 class="home-hero-title">Nâre</h1>
     </section>
 
-    <!-- VIEW 2: MENU VIEW -->
     <section id="view-menu" class="view">
       <div class="menu-container">
         <div class="menu-split-layout">
-          <!-- Sol Sütun -->
           <div class="menu-column" id="menu-col-left"></div>
-          <!-- Sağ Sütun -->
           <div class="menu-column" id="menu-col-right"></div>
         </div>
       </div>
     </section>
 
-    <!-- VIEW 3: ABOUT VIEW -->
     <section id="view-about" class="view">
       <h2 class="about-title">Hakkımızda</h2>
       <div id="about-content" class="about-wrapper about-md-render"></div>
     </section>
 
-    <!-- VIEW 4: ADMIN DASHBOARD CONTROL PANEL -->
     <section id="view-admin" class="view">
       <div class="admin-toolbar" style="display:flex; justify-content:space-between; align-items:center;">
         <h2>Yönetim Paneli</h2>
-        <button class="btn btn-secondary btn-sm" id="btn-logout">Oturumu Kapat</button>
+        <button class="btn btn-danger btn-sm" id="btn-logout">Oturumu Kapat</button>
       </div>
 
       <div class="admin-grid">
-        <!-- SOL PANEL: KATEGORİ EDİTÖRÜ -->
+        
         <div class="admin-box">
           <h3 class="admin-box-title">Kategori Yönetimi</h3>
+          
           <div class="form-group">
-            <label>Yeni Kategori Adı</label>
-            <input type="text" id="input-cat-name" class="form-ctrl" placeholder="Örn: Sütlü Tatlılar" />
+            <label>Kategori Adı</label>
+            <input type="text" id="input-cat-name" class="form-ctrl" placeholder="Örn: Waffle'lar" />
           </div>
+
           <div class="form-group">
-            <label>Sütun Yerleşimi (PC)</label>
+            <label>Kategori Arka Plan Görseli</label>
+            <input type="file" id="input-cat-file" class="form-ctrl" accept="image/*" />
+            <div class="crop-preview-wrapper" id="cat-crop-hud">
+              <img src="" class="crop-simulated-img" id="cat-crop-img" alt="Kırpma Alanı" />
+              <div class="crop-overlay-hud"></div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Gradyan Kaplama Rengi (Soldan Sağa Geçişli)</label>
+            <div class="color-circles-palette" id="cat-color-palette">
+              </div>
+            <input type="hidden" id="selected-cat-color" value="#a855f7" />
+          </div>
+
+          <div class="form-group">
+            <label>Sütun Konumu (PC)</label>
             <select id="select-cat-col" class="form-ctrl">
-              <option value="left">Sol Taraf</option>
-              <option value="right">Sağ Taraf</option>
+              <option value="left">Sol Kolon (Dikey Çizginin Solu)</option>
+              <option value="right">Sağ Kolon (Dikey Çizginin Sağı)</option>
             </select>
           </div>
-          <button class="btn btn-dark" id="btn-add-category" style="width:100%; margin-bottom:2rem;">Kategori Ekle</button>
+
+          <button class="btn btn-dark" id="btn-add-category" style="width:100%; margin-bottom:2rem;">Kategoriyi Kaydet</button>
 
           <div id="admin-cat-list-container"></div>
         </div>
 
-        <!-- SAĞ PANEL: ÜRÜN EDİTÖRÜ & HAKKIMIZDA MARKDOWN -->
         <div class="admin-layout-right" style="display:flex; flex-direction:column; gap:2.5rem;">
           
           <div class="admin-box">
             <h3 class="admin-box-title" id="product-form-title">Yeni Ürün Ekle</h3>
             <input type="hidden" id="edit-prod-id" value="" />
+            
             <div class="product-form-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
               <div class="form-group">
                 <label>Ürün Adı</label>
-                <input type="text" id="prod-name" class="form-ctrl" placeholder="Örn: Fıstıklı Baklava" />
+                <input type="text" id="prod-name" class="form-ctrl" placeholder="Örn: Berry Bliss" />
               </div>
               <div class="form-group">
                 <label>Fiyat</label>
-                <input type="text" id="prod-price" class="form-ctrl" placeholder="Örn: 180 TL" />
+                <input type="text" id="prod-price" class="form-ctrl" placeholder="Örn: 240 TL" />
               </div>
               <div class="form-group" style="grid-column: 1 / -1;">
-                <label>Kategori Bağlantısı</label>
+                <label>Ürün Açıklaması / İçindekiler</label>
+                <textarea id="prod-desc" class="form-ctrl" style="height:70px; resize:none;" placeholder="Örn: Taze çilek, yaban mersini, Lotus bisküvisi ezmesi ile..."></textarea>
+              </div>
+              <div class="form-group" style="grid-column: 1 / -1;">
+                <label>Ürün Görseli (Küçük Daire İçin)</label>
+                <input type="file" id="input-prod-file" class="form-ctrl" accept="image/*" />
+                <div class="crop-preview-wrapper" id="prod-crop-hud" style="height:100px;">
+                  <img src="" class="crop-simulated-img" id="prod-crop-img" alt="Ürün Önizleme" />
+                  <div class="crop-overlay-hud"></div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Ürün Öne Çıkan Etiketi (Tag - Opsiyonel)</label>
+                <input type="text" id="prod-tag-text" class="form-ctrl" placeholder="Örn: Yeni, Popüler" />
+              </div>
+              <div class="form-group">
+                <label>Etiket Arka Plan Rengi</label>
+                <div class="color-circles-palette" id="prod-tag-palette">
+                  </div>
+                <input type="hidden" id="selected-tag-color" value="" />
+              </div>
+              <div class="form-group" style="grid-column: 1 / -1;">
+                <label>Bağlı Olduğu Kategori</label>
                 <select id="prod-category-select" class="form-ctrl"></select>
               </div>
             </div>
-            <div style="display:flex; gap:1rem; margin-top:1rem;">
-              <button class="btn btn-dark" id="btn-save-product" style="flex:1;">Ürünü Kaydet</button>
-              <button class="btn btn-secondary btn-sm hidden" id="btn-cancel-edit">İptal</button>
+
+            <div style="display:flex; gap:1rem; margin-top:1.5rem;">
+              <button class="btn btn-dark" id="btn-save-product" style="flex:1;">Ürünü Sisteme Kaydet</button>
+              <button class="btn btn-danger btn-sm hidden" id="btn-cancel-edit">İptal Et</button>
             </div>
 
-            <h4 style="margin-top:2rem; margin-bottom:1rem; font-size:0.9rem; text-transform:uppercase; letter-spacing:0.05rem;">Mevcut Ürün Listesi</h4>
+            <h4 style="margin-top:2.5rem; margin-bottom:1rem; font-size:0.85rem; text-transform:uppercase; letter-spacing:0.05rem;">Mevcut Ürün Sıralama Havuzu</h4>
             <div id="admin-prod-list-container"></div>
           </div>
 
           <div class="admin-box">
-            <h3 class="admin-box-title">Hakkımızda Sayfası İçeriği</h3>
+            <h3 class="admin-box-title">Hakkımızda Sayfa Düzenleyicisi</h3>
             <div class="form-group">
-              <label>Markdown Metni</label>
+              <label>Markdown Kaynak İçeriği</label>
               <textarea id="admin-about-editor" class="form-ctrl about-edit-area" placeholder="# Hikayemiz..."></textarea>
             </div>
             <button class="btn btn-dark" id="btn-save-about" style="width:100%;">Değişiklikleri Kaydet</button>
@@ -373,9 +464,6 @@
 
   </main>
 
-  <!-- =====================================================
-       SECRET ADMIN TRIGGER INTERFACE CONTAINER
-  ===================================================== -->
   <div id="secret-lock-container">
     <div id="secret-login-modal">
       <div class="form-group">
@@ -386,20 +474,17 @@
         <label>Şifre</label>
         <input type="password" id="login-password" class="form-ctrl" placeholder="••••••••" />
       </div>
-      <button class="btn btn-dark btn-sm" id="btn-login" style="width:100%;">Giriş</button>
+      <button class="btn btn-dark btn-sm" id="btn-login" style="width:100%;">Giriş Yap</button>
     </div>
     
     <button id="lock-trigger" aria-label="Yönetici Girişi"><i class="fa-solid fa-lock"></i></button>
   </div>
 
-  <!-- =====================================================
-       JAVASCRIPT ARCHITECTURE ENVIRONMENT LOGIC
-  ===================================================== -->
   <script>
     'use strict';
 
     /* --------------------------------------------------
-       SUPABASE CREDENTIALS INITIALIZATION
+       SUPABASE INITIALIZATION ENVIRONMENT CONNECTIVITY
     -------------------------------------------------- */
     const SUPABASE_URL = "https://xmjfedgprzjyacrkbzzh.supabase.co";
     const SUPABASE_KEY = "sb_publishable_kX44mJgJAIjojczGoMp66A_0PH1Ueyv";
@@ -408,7 +493,13 @@
     let cacheCategories = [];
     let cacheProducts = [];
 
-    /* TOAST NOTIFIER SYSTEM */
+    // Sabit Seçilebilir 8 Estetik Renk Yuvarlağı Paleti (Hex Listesi)
+    const PRESET_COLORS = [
+      "#2C1A11", "#C49B66", "#7A306C", "#4F6D7A", 
+      "#386641", "#9E2A2B", "#6A4C93", "#D81159"
+    ];
+
+    /* TOAST BANNER NOTIFIER ENGINE */
     function showToast(msg, isErr = false) {
       const t = document.getElementById('toast');
       t.textContent = msg;
@@ -417,7 +508,7 @@
       setTimeout(() => t.classList.remove('visible'), 3500);
     }
 
-    /* VIEW MANAGEMENT SYSTEMS SPA */
+    /* VIEW MANAGEMENT SPA LOGIC INTERFACE */
     function showView(viewId) {
       document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
       document.querySelectorAll('.nav-tabs a').forEach(a => a.classList.remove('active'));
@@ -432,22 +523,76 @@
       document.getElementById('nav-toggle').classList.remove('open');
     }
 
-    document.querySelectorAll('.nav-tabs a, .brand-logo').forEach(element => {
-      element.addEventListener('click', (e) => {
-        e.preventDefault();
-        const target = element.dataset.target || 'home';
-        showView(target);
-      });
+    document.querySelectorAll('.nav-tabs a').forEach(el => {
+      el.addEventListener('click', (e) => { e.preventDefault(); showView(el.dataset.target); });
     });
 
-    /* MOBILE NAVIGATION BURGER HAMBURGER TRIGGER */
     document.getElementById('nav-toggle').addEventListener('click', function() {
       this.classList.toggle('open');
       document.getElementById('nav-tabs').classList.toggle('open');
     });
 
     /* --------------------------------------------------
-       DATA RECONSTRUCT LOGIC: PUBLIC READ CONTROLLERS
+       UX COMPONENT INITIALIZERS: 8 COLOR PALETTE SELECTOR
+    -------------------------------------------------- */
+    function initColorPalettes() {
+      const catPalette = document.getElementById('cat-color-palette');
+      const tagPalette = document.getElementById('prod-tag-palette');
+      catPalette.innerHTML = '';
+      tagPalette.innerHTML = '';
+
+      PRESET_COLORS.forEach((color, idx) => {
+        // Kategori paleti elemanları
+        const cCircle = document.createElement('div');
+        cCircle.className = `color-circle-opt ${idx === 2 ? 'selected' : ''}`;
+        cCircle.style.backgroundColor = color;
+        cCircle.addEventListener('click', () => {
+          catPalette.querySelectorAll('.color-circle-opt').forEach(c => c.classList.remove('selected'));
+          cCircle.classList.add('selected');
+          document.getElementById('selected-cat-color').value = color;
+        });
+        catPalette.appendChild(cCircle);
+
+        // Ürün Tag paleti elemanları
+        const tCircle = document.createElement('div');
+        tCircle.className = 'color-circle-opt';
+        tCircle.style.backgroundColor = color;
+        tCircle.addEventListener('click', () => {
+          const isSelected = tCircle.classList.contains('selected');
+          tagPalette.querySelectorAll('.color-circle-opt').forEach(c => c.classList.remove('selected'));
+          if (!isSelected) {
+            tCircle.classList.add('selected');
+            document.getElementById('selected-tag-color').value = color;
+          } else {
+            document.getElementById('selected-tag-color').value = "";
+          }
+        });
+        tagPalette.appendChild(tCircle);
+      });
+    }
+
+    /* 🛠️ GÖRSEL CROP HUD SIMULATION LISTENERS */
+    function bindCropSimulators() {
+      setupCropHandler('input-cat-file', 'cat-crop-hud', 'cat-crop-img');
+      setupCropHandler('input-prod-file', 'prod-crop-hud', 'prod-crop-img');
+    }
+
+    function setupCropHandler(inputId, hudId, imgId) {
+      document.getElementById(inputId).addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function(event) {
+            document.getElementById(imgId).src = event.target.result;
+            document.getElementById(hudId).classList.add('active');
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+    }
+
+    /* --------------------------------------------------
+       DATA ASYNC CONTEXT RECONSTRUCT READ SYSTEMS
     -------------------------------------------------- */
     async function loadPublicData() {
       try {
@@ -459,15 +604,15 @@
         if(err2) throw err2;
         cacheProducts = prods || [];
 
-        renderMenuDOM();
+        renderAccordionPublicMenu();
         renderAdminCategoryEditor();
         renderAdminProductEditor();
       } catch (err) {
-        showToast("Veriler yüklenirken hata oluştu: " + err.message, true);
+        showToast("Veriler yüklenirken hata oluştu.", true);
       }
     }
 
-    function renderMenuDOM() {
+    function renderAccordionPublicMenu() {
       const leftCol = document.getElementById('menu-col-left');
       const rightCol = document.getElementById('menu-col-right');
       leftCol.innerHTML = '';
@@ -475,31 +620,58 @@
 
       cacheCategories.forEach(cat => {
         const catProds = cacheProducts.filter(p => p.category_id === cat.id);
+        const overlayColor = cat.gradient_color || "#7a306c";
+
+        let accNode = document.createElement('div');
+        accNode.className = 'menu-category-accordion';
         
-        let blockHtml = `
-          <div class="menu-category-block">
-            <h3 class="menu-cat-title">${escHtml(cat.name)}</h3>
+        let headerHtml = `
+          <button class="accordion-header" onclick="this.parentElement.classList.toggle('open')">
+            <img src="${escHtml(cat.image_url || 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600')}" class="accordion-bg-img" alt="${escHtml(cat.name)}" />
+            <div class="accordion-gradient-overlay" style="background: linear-gradient(to right, ${overlayColor}ee 30%, transparent 100%);"></div>
+            <div class="accordion-title-wrapper">
+              <h3 class="accordion-cat-name">${escHtml(cat.name)}</h3>
+            </div>
+            <i class="fa-solid fa-chevron-down accordion-chevron"></i>
+          </button>
         `;
-        
-        if(catProds.length === 0) {
-          blockHtml += `<p style="font-size:0.85rem; color:var(--gray-ink); font-style:italic;">Bu kategoride henüz ürün bulunmuyor.</p>`;
+
+        let contentNode = document.createElement('div');
+        contentNode.className = 'accordion-content';
+
+        if (catProds.length === 0) {
+          contentNode.innerHTML = `<p style="padding:1.5rem 2rem; font-size:0.88rem; color:var(--gray-ink); font-style:italic;">Bu grupta henüz bir ürün listelenmemiş.</p>`;
         } else {
           catProds.forEach(p => {
-            blockHtml += `
-              <div class="menu-item-row">
-                <span class="menu-item-name">${escHtml(p.name)}</span>
-                <span class="menu-item-dots"></span>
-                <span class="menu-item-price">${escHtml(p.price)}</span>
+            let tagMarkup = '';
+            if (p.tag_text) {
+              const bgTag = p.tag_color || 'var(--chocolate)';
+              tagMarkup = `<span class="product-tag-badge" style="background-color:${bgTag};">${escHtml(p.tag_text)}</span>`;
+            }
+
+            contentNode.innerHTML += `
+              <div class="menu-product-row">
+                <img src="${escHtml(p.image_url || 'https://images.unsplash.com/photo-1551024601-bec78aea704b?w=150')}" class="product-img-circle" alt="${escHtml(p.name)}" onerror="this.src='https://images.unsplash.com/photo-1551024601-bec78aea704b?w=150'" />
+                <div class="product-details-box">
+                  <div class="product-title-group">
+                    <span class="product-row-name">${escHtml(p.name)}</span>
+                    ${tagMarkup}
+                  </div>
+                  <p class="product-row-desc">${escHtml(p.description || '')}</p>
+                  <span class="product-row-price">${escHtml(p.price)}</span>
+                </div>
               </div>
             `;
           });
         }
-        blockHtml += `</div>`;
 
-        if(cat.column_placement === 'right') {
-          rightCol.innerHTML += blockHtml;
+        accNode.innerHTML = headerHtml;
+        accNode.appendChild(contentNode);
+
+        if (cat.column_placement === 'right') {
+          rightCol.appendChild(accNode);
         } else {
-          leftCol.innerHTML += blockHtml;
+          leftCol.appendChild(accNode);
         }
       });
     }
@@ -509,34 +681,54 @@
         const { data, error } = await sb.from('content').select('value').eq('key', 'about_page').single();
         if(error && error.code !== 'PGRST116') throw error;
         
-        const rawMd = data ? data.value : "# Hakkımızda\nHikayemiz yakında burada yer alacak...";
+        const rawMd = data ? data.value : "# Hikayemiz\nNâre lezzet hikayesi yakında burada.";
         document.getElementById('about-content').innerHTML = marked.parse(rawMd);
         document.getElementById('admin-about-editor').value = rawMd;
         document.getElementById('admin-preview').innerHTML = marked.parse(rawMd);
-      } catch(err) {
-        showToast("Hakkımızda içeriği alınamadı.", true);
-      }
+      } catch(err) { showToast("Hakkımızda içeriği yüklenemedi.", true); }
     }
 
     /* --------------------------------------------------
-       ADMIN STRATEGIES: CATEGORIES AND POSITION RANKS
+       MUTATION WRITE EXECUTORS: KATEGORİ KAYDET/SİL/HIZALAMA
     -------------------------------------------------- */
     document.getElementById('btn-add-category').addEventListener('click', async () => {
       const name = document.getElementById('input-cat-name').value.trim();
       const col = document.getElementById('select-cat-col').value;
-      if(!name) return;
+      const gradientColor = document.getElementById('selected-cat-color').value;
+      const fileEl = document.getElementById('input-cat-file');
+      const file = fileEl.files[0];
+
+      if (!name) { showToast("Kategori adı boş olamaz.", true); return; }
 
       try {
+        let imageUrl = null;
+        // Eğer görsel seçilmişse `nare-media` bucket'ına yükle
+        if (file) {
+          const ext = file.name.split('.').pop();
+          const filePath = `cat_${Date.now()}.${ext}`;
+          const { error: uploadErr } = await sb.storage.from('nare-media').upload(filePath, file);
+          if (uploadErr) throw uploadErr;
+          
+          const { data: urlData } = sb.storage.from('nare-media').getPublicUrl(filePath);
+          imageUrl = urlData.publicUrl;
+        }
+
         const nextIndex = cacheCategories.length * 10;
-        const { error } = await sb.from('categories').insert([{ name, column_placement: col, sort_index: nextIndex }]);
-        if(error) throw error;
-        
+        const { error } = await sb.from('categories').insert([{
+          name,
+          column_placement: col,
+          gradient_color: gradientColor,
+          image_url: imageUrl,
+          sort_index: nextIndex
+        }]);
+        if (error) throw error;
+
+        showToast("Kategori başarıyla oluşturuldu.");
         document.getElementById('input-cat-name').value = '';
-        showToast("Kategori başarıyla eklendi.");
+        fileEl.value = '';
+        document.getElementById('cat-crop-hud').classList.remove('active');
         loadPublicData();
-      } catch (err) {
-        showToast("Hata: " + err.message, true);
-      }
+      } catch (err) { showToast("Kategori eklenemedi: " + err.message, true); }
     });
 
     function renderAdminCategoryEditor() {
@@ -546,17 +738,21 @@
       selectDropdown.innerHTML = '';
 
       cacheCategories.forEach((cat, index) => {
-        selectDropdown.innerHTML += `<option value="${cat.id}">${escHtml(cat.name)} (${cat.column_placement === 'left' ? 'Sol' : 'Sağ'})</option>`;
-        
+        selectDropdown.innerHTML += `<option value="${cat.id}">${escHtml(cat.name)}</option>`;
+        const tThumb = cat.image_url || 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=100';
+
         container.innerHTML += `
           <div class="editor-list-item">
-            <div>
-              <strong>${escHtml(cat.name)}</strong> 
-              <span style="font-size:0.7rem; color:var(--gray-ink);">(${cat.column_placement === 'left' ? 'Sol' : 'Sağ'})</span>
+            <div style="display:flex; align-items:center; gap:0.75rem;">
+              <img src="${tThumb}" class="admin-list-thumb" alt="" />
+              <div>
+                <strong>${escHtml(cat.name)}</strong>
+                <div style="font-size:0.7rem; color:var(--gray-ink);">Konum: ${cat.column_placement === 'left' ? 'Sol' : 'Sağ'} Sütun</div>
+              </div>
             </div>
             <div class="item-drag-actions">
-              <button class="item-drag-btn" onclick="moveCategory(${cat.id}, 'up')" ${index === 0 ? 'disabled style="opacity:0.3;"' : ''}><i class="fa-solid fa-arrow-up"></i></button>
-              <button class="item-drag-btn" onclick="moveCategory(${cat.id}, 'down')" ${index === cacheCategories.length - 1 ? 'disabled style="opacity:0.3;"' : ''}><i class="fa-solid fa-arrow-down"></i></button>
+              <button class="item-drag-btn" onclick="moveCategory(${cat.id}, 'up')" ${index === 0 ? 'disabled style="opacity:0.2;"' : ''}><i class="fa-solid fa-arrow-up"></i></button>
+              <button class="item-drag-btn" onclick="moveCategory(${cat.id}, 'down')" ${index === cacheCategories.length - 1 ? 'disabled style="opacity:0.2;"' : ''}><i class="fa-solid fa-arrow-down"></i></button>
               <button class="item-drag-btn" onclick="toggleCategorySide(${cat.id}, '${cat.column_placement}')"><i class="fa-solid fa-arrows-left-right"></i></button>
               <button class="item-drag-btn" style="color:var(--danger);" onclick="deleteCategory(${cat.id})"><i class="fa-solid fa-trash"></i></button>
             </div>
@@ -566,71 +762,82 @@
     }
 
     async function moveCategory(id, direction) {
-      const targetIndex = cacheCategories.findIndex(c => c.id === id);
-      if(targetIndex === -1) return;
+      const idx = cacheCategories.findIndex(c => c.id === id);
+      let partnerIdx = direction === 'up' ? idx - 1 : idx + 1;
+      if (partnerIdx < 0 || partnerIdx >= cacheCategories.length) return;
 
-      let partnerIndex = direction === 'up' ? targetIndex - 1 : targetIndex + 1;
-      if(partnerIndex < 0 || partnerIndex >= cacheCategories.length) return;
-
-      const currentCat = cacheCategories[targetIndex];
-      const partnerCat = cacheCategories[partnerIndex];
+      const c1 = cacheCategories[idx];
+      const c2 = cacheCategories[partnerIdx];
 
       try {
-        await sb.from('categories').update({ sort_index: partnerCat.sort_index }).eq('id', currentCat.id);
-        await sb.from('categories').update({ sort_index: currentCat.sort_index }).eq('id', partnerCat.id);
+        await sb.from('categories').update({ sort_index: c2.sort_index }).eq('id', c1.id);
+        await sb.from('categories').update({ sort_index: c1.sort_index }).eq('id', c2.id);
         loadPublicData();
-      } catch(err) {
-        showToast("Sıralama değiştirilemedi.", true);
-      }
+      } catch(e) { showToast("Sıralama değiştirilemedi.", true); }
     }
 
     async function toggleCategorySide(id, currentSide) {
       const nextSide = currentSide === 'left' ? 'right' : 'left';
       try {
-        const { error } = await sb.from('categories').update({ column_placement: nextSide }).eq('id', id);
-        if(error) throw error;
+        await sb.from('categories').update({ column_placement: nextSide }).eq('id', id);
         loadPublicData();
-      } catch(err) { showToast("Sütun değiştirilemedi.", true); }
+      } catch(e) { showToast("Konum değiştirilemedi.", true); }
     }
 
     async function deleteCategory(id) {
-      if(!confirm("Kategoriyi silmek istediğinize emin misiniz? Bağlı ürünler kategorisiz kalacaktır.")) return;
+      if(!confirm("Bu kategoriyi silmek istediğinize emin misiniz? Altındaki tüm ürünler silinecektir.")) return;
       try {
-        const { error } = await sb.from('categories').delete().eq('id', id);
-        if(error) throw error;
+        await sb.from('categories').delete().eq('id', id);
         loadPublicData();
-      } catch(err) { showToast("Kategori silinemedi.", true); }
+      } catch(e) { showToast("Kategori silinemedi.", true); }
     }
 
     /* --------------------------------------------------
-       PRODUCT MUTATION PROCESSING CONTROLLER LOGIC
+       MUTATION WRITE EXECUTORS: ÜRÜN EKLE/DÜZENLE/SİL
     -------------------------------------------------- */
     document.getElementById('btn-save-product').addEventListener('click', async () => {
       const name = document.getElementById('prod-name').value.trim();
       const price = document.getElementById('prod-price').value.trim();
-      const selectEl = document.getElementById('prod-category-select');
-      const categoryId = selectEl.value ? parseInt(selectEl.value) : null;
+      const desc = document.getElementById('prod-desc').value.trim();
+      const tagText = document.getElementById('prod-tag-text').value.trim();
+      const tagColor = document.getElementById('selected-tag-color').value;
+      const catSelect = document.getElementById('prod-category-select');
+      const categoryId = catSelect.value ? parseInt(catSelect.value) : null;
       const editId = document.getElementById('edit-prod-id').value;
+      const fileEl = document.getElementById('input-prod-file');
+      const file = fileEl.files[0];
 
-      if(!name || !price || !categoryId) {
-        showToast("Lütfen tüm alanları doldurun ve en az bir kategori seçin.", true);
-        return;
-      }
+      if (!name || !price || !categoryId) { showToast("Lütfen isim, fiyat ve kategori seçiniz.", true); return; }
 
       try {
-        if(editId) {
-          const { error } = await sb.from('products').update({ name, price, category_id: categoryId }).eq('id', editId);
-          if(error) throw error;
-          showToast("Ürün güncellendi.");
-        } else {
-          const nextIndex = cacheProducts.length * 10;
-          const { error } = await sb.from('products').insert([{ name, price, category_id: categoryId, sort_index: nextIndex }]);
-          if(error) throw error;
-          showToast("Ürün başarıyla eklendi.");
+        let imageUrl = null;
+        if (file) {
+          const ext = file.name.split('.').pop();
+          const filePath = `prod_${Date.now()}.${ext}`;
+          const { error: uploadErr } = await sb.storage.from('nare-media').upload(filePath, file);
+          if (uploadErr) throw uploadErr;
+          
+          const { data: urlData } = sb.storage.from('nare-media').getPublicUrl(filePath);
+          imageUrl = urlData.publicUrl;
         }
+
+        const payload = {
+          name, price, description: desc, tag_text: tagText, tag_color: tagColor, category_id: categoryId
+        };
+        if (imageUrl) payload.image_url = imageUrl;
+
+        if (editId) {
+          await sb.from('products').update(payload).eq('id', editId);
+          showToast("Ürün başarıyla güncellendi.");
+        } else {
+          payload.sort_index = cacheProducts.length * 10;
+          await sb.from('products').insert([payload]);
+          showToast("Yeni ürün başarıyla eklendi.");
+        }
+
         resetProductForm();
         loadPublicData();
-      } catch (err) { showToast("Ürün kaydedilemedi: " + err.message, true); }
+      } catch (err) { showToast("Ürün işleminde hata: " + err.message, true); }
     });
 
     function renderAdminProductEditor() {
@@ -639,17 +846,20 @@
 
       cacheProducts.forEach((p, index) => {
         const cat = cacheCategories.find(c => c.id === p.category_id);
-        const catName = cat ? cat.name : 'Belirsiz';
+        const pThumb = p.image_url || 'https://images.unsplash.com/photo-1551024601-bec78aea704b?w=100';
 
         container.innerHTML += `
           <div class="editor-list-item">
-            <div>
-              <strong>${escHtml(p.name)}</strong> — <span style="font-family:var(--font-serif);">${escHtml(p.price)}</span>
-              <div style="font-size:0.7rem; color:var(--gray-ink); margin-top:2px;">Grup: ${escHtml(catName)}</div>
+            <div style="display:flex; align-items:center; gap:0.75rem;">
+              <img src="${pThumb}" class="admin-list-thumb" alt="" />
+              <div>
+                <strong>${escHtml(p.name)}</strong> — <span>${escHtml(p.price)}</span>
+                <div style="font-size:0.7rem; color:var(--gray-ink);">Grup: ${escHtml(cat ? cat.name : 'Belirsiz')}</div>
+              </div>
             </div>
             <div class="item-drag-actions">
-              <button class="item-drag-btn" onclick="moveProduct(${p.id}, 'up')" ${index === 0 ? 'disabled style="opacity:0.3;"' : ''}><i class="fa-solid fa-arrow-up"></i></button>
-              <button class="item-drag-btn" onclick="moveProduct(${p.id}, 'down')" ${index === cacheProducts.length - 1 ? 'disabled style="opacity:0.3;"' : ''}><i class="fa-solid fa-arrow-down"></i></button>
+              <button class="item-drag-btn" onclick="moveProduct(${p.id}, 'up')" ${index === 0 ? 'disabled style="opacity:0.2;"' : ''}><i class="fa-solid fa-arrow-up"></i></button>
+              <button class="item-drag-btn" onclick="moveProduct(${p.id}, 'down')" ${index === cacheProducts.length - 1 ? 'disabled style="opacity:0.2;"' : ''}><i class="fa-solid fa-arrow-down"></i></button>
               <button class="item-drag-btn" onclick="startEditProduct(${p.id})"><i class="fa-solid fa-pen"></i></button>
               <button class="item-drag-btn" style="color:var(--danger);" onclick="deleteProduct(${p.id})"><i class="fa-solid fa-trash"></i></button>
             </div>
@@ -659,20 +869,18 @@
     }
 
     async function moveProduct(id, direction) {
-      const targetIndex = cacheProducts.findIndex(p => p.id === id);
-      if(targetIndex === -1) return;
+      const idx = cacheProducts.findIndex(p => p.id === id);
+      let partnerIdx = direction === 'up' ? idx - 1 : idx + 1;
+      if (partnerIdx < 0 || partnerIdx >= cacheProducts.length) return;
 
-      let partnerIndex = direction === 'up' ? targetIndex - 1 : targetIndex + 1;
-      if(partnerIndex < 0 || partnerIndex >= cacheProducts.length) return;
-
-      const currentProd = cacheProducts[targetIndex];
-      const partnerProd = cacheProducts[partnerIndex];
+      const p1 = cacheProducts[idx];
+      const p2 = cacheProducts[partnerIdx];
 
       try {
-        await sb.from('products').update({ sort_index: partnerProd.sort_index }).eq('id', currentProd.id);
-        await sb.from('products').update({ sort_index: currentProd.sort_index }).eq('id', partnerProd.id);
+        await sb.from('products').update({ sort_index: p2.sort_index }).eq('id', p1.id);
+        await sb.from('products').update({ sort_index: p1.sort_index }).eq('id', p2.id);
         loadPublicData();
-      } catch(err) { showToast("Sıralama değiştirilemedi.", true); }
+      } catch(e) { showToast("Ürün sırası değiştirilemedi.", true); }
     }
 
     function startEditProduct(id) {
@@ -682,16 +890,24 @@
       document.getElementById('edit-prod-id').value = p.id;
       document.getElementById('prod-name').value = p.name;
       document.getElementById('prod-price').value = p.price;
-      document.getElementById('prod-category-select').value = p.category_id;
+      document.getElementById('prod-desc').value = p.description || '';
+      document.getElementById('prod-tag-text').value = p.tag_text || '';
+      document.getElementById('selected-tag-color').value = p.tag_color || '';
 
       document.getElementById('product-form-title').textContent = "Ürünü Düzenle";
       document.getElementById('btn-cancel-edit').classList.remove('hidden');
+      window.scrollTo({ top: document.getElementById('product-form-title').offsetTop - 100, behavior: 'smooth' });
     }
 
     function resetProductForm() {
       document.getElementById('edit-prod-id').value = '';
       document.getElementById('prod-name').value = '';
       document.getElementById('prod-price').value = '';
+      document.getElementById('prod-desc').value = '';
+      document.getElementById('prod-tag-text').value = '';
+      document.getElementById('input-prod-file').value = '';
+      document.getElementById('selected-tag-color').value = '';
+      document.getElementById('prod-crop-hud').classList.remove('active');
       document.getElementById('product-form-title').textContent = "Yeni Ürün Ekle";
       document.getElementById('btn-cancel-edit').classList.add('hidden');
     }
@@ -700,13 +916,12 @@
     async function deleteProduct(id) {
       if(!confirm("Bu ürünü silmek istediğinize emin misiniz?")) return;
       try {
-        const { error } = await sb.from('products').delete().eq('id', id);
-        if(error) throw error;
+        await sb.from('products').delete().eq('id', id);
         loadPublicData();
-      } catch(err) { showToast("Ürün silinemedi.", true); }
+      } catch(e) { showToast("Ürün silinemedi.", true); }
     }
 
-    /* ABOUT EDITOR PROCESS OPERATIONS */
+    /* ABOUT CONTENT METIN DÜZENLEYİCİ */
     document.getElementById('admin-about-editor').addEventListener('input', function() {
       document.getElementById('admin-preview').innerHTML = marked.parse(this.value);
     });
@@ -716,30 +931,21 @@
       const btn = document.getElementById('btn-save-about');
       btn.disabled = true;
       try {
-        const { error } = await sb.from('content').upsert({ key: 'about_page', value: val }, { onConflict: 'key' });
-        if(error) throw error;
-        showToast("Hakkımızda içeriği güncellendi.");
+        await sb.from('content').upsert({ key: 'about_page', value: val }, { onConflict: 'key' });
+        showToast("Hakkımızda sayfası güncellendi.");
         loadAboutContent();
-      } catch(err) { showToast("Kaydedilirken hata oluştu.", true); }
+      } catch(err) { showToast("Metin kaydedilemedi.", true); }
       finally { btn.disabled = false; }
     });
 
     /* --------------------------------------------------
-       SECRET AUTH SECURITY PANEL AND TOAST TRIGGERS
+       GİZLİ KİLİT PANEL GİRİŞ-ÇIKIŞ SİSTEMİ
     -------------------------------------------------- */
     const lockBtn = document.getElementById('lock-trigger');
     const modalBox = document.getElementById('secret-login-modal');
 
-    lockBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      modalBox.classList.toggle('open');
-    });
-
-    document.addEventListener('click', (e) => {
-      if(!modalBox.contains(e.target) && e.target !== lockBtn) {
-        modalBox.classList.remove('open');
-      }
-    });
+    lockBtn.addEventListener('click', (e) => { e.stopPropagation(); modalBox.classList.toggle('open'); });
+    document.addEventListener('click', (e) => { if(!modalBox.contains(e.target) && e.target !== lockBtn) modalBox.classList.remove('open'); });
 
     document.getElementById('btn-login').addEventListener('click', async () => {
       const email = document.getElementById('login-email').value.trim();
@@ -747,15 +953,15 @@
       try {
         const { error } = await sb.auth.signInWithPassword({ email, password: pass });
         if(error) throw error;
-        showToast("Başarıyla giriş yapıldı.");
+        showToast("Yönetici girişi onaylandı.");
         modalBox.classList.remove('open');
         evaluateSession();
-      } catch(err) { showToast("Giriş başarısız: " + err.message, true); }
+      } catch(err) { showToast("Hatalı kimlik bilgileri.", true); }
     });
 
     document.getElementById('btn-logout').addEventListener('click', async () => {
       await sb.auth.signOut();
-      showToast("Oturum kapatıldı.");
+      showToast("Oturum güvenli bir şekilde kapatıldı.");
       showView('home');
       evaluateSession();
     });
@@ -763,28 +969,20 @@
     async function evaluateSession() {
       const { data: { session } } = await sb.auth.getSession();
       const adminBadge = document.querySelector('.admin-badge-tab');
-      
-      if(session) {
-        adminBadge.classList.add('visible');
-      } else {
-        adminBadge.classList.remove('visible');
-      }
+      if(session) { adminBadge.classList.add('visible'); } else { adminBadge.classList.remove('visible'); }
     }
 
     sb.auth.onAuthStateChange(() => { evaluateSession(); });
 
-    /* ANTI XSS UTILITIES ESCAPING HTML */
     function escHtml(str) {
-      return String(str ?? '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
+      return String(str ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
 
     /* --------------------------------------------------
-       INIT
+       LIFECYCLE INITIALIZER ENGINE
     -------------------------------------------------- */
+    initColorPalettes();
+    bindCropSimulators();
     loadPublicData();
     loadAboutContent();
     evaluateSession();
