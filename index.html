@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nâre — Tatlı Evi</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <!-- FontAwesome İkonları için CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    /* =====================================================
+       DESIGN SYSTEM & COLOR PALETTE
+    ===================================================== */
+    :root {
+      --bg-cream:      #FBF9F6;
+      --bg-card:       #F5F0E9;
+      --chocolate:     #2C1A11;
+      --choc-soft:     #4A3225;
+      --gold:          #C49B66;
+      --white:         #FFFFFF;
+      --gray-ink:      #8C827A;
+      --divider:       #E6DFD5;
+      --danger:        #9E2A2B;
+      --success:       #386641;
+
+      --font-serif:   'Georgia', 'Times New Roman', serif;
+      --font-sans:    'Helvetica Neue', 'Arial', sans-serif;
+      --font-mono:    'Courier New', monospace;
+
+      --nav-h:        80px;
+      --transition:   0.35s cubic-bezier(0.25, 1, 0.5, 1);
+      --radius:       4px;
+    }
+
+    /* =====================================================
+       RESET & BASE DEFINITIONS
+    ===================================================== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; font-size: 16px; }
+    body {
+      background: var(--bg-cream);
+      color: var(--chocolate);
+      font-family: var(--font-sans);
+      line-height: 1.6;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      display: flex;
+      flex-direction: column;
+    }
+    main { flex: 1; }
+    button { cursor: pointer; font-family: inherit; border: none; outline: none; background: none; }
+    input, textarea, select { font-family: inherit; outline: none; }
+
+    /* =====================================================
+       NAVIGATION BAR
+    ===================================================== */
+    #navbar {
+      height: var(--nav-h);
+      border-bottom: 1px solid var(--divider);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 clamp(1.5rem, 6vw, 5rem);
+      position: sticky; top: 0; z-index: 1000;
+      background: rgba(251, 249, 246, 0.9);
+      backdrop-filter: blur(12px);
+    }
+    .brand-logo {
+      font-family: var(--font-serif);
+      font-size: 2rem; font-weight: 400; letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+    .nav-tabs {
+      display: flex; align-items: center; gap: 2.5rem; list-style: none;
+    }
+    .nav-tabs a {
+      font-size: 0.8rem; letter-spacing: 0.15em; text-transform: uppercase;
+      color: var(--choc-soft); font-weight: 500; padding-bottom: 4px;
+      position: relative; transition: color var(--transition);
+    }
+    .nav-tabs a::after {
+      content: ''; position: absolute; bottom: 0; left: 0;
+      width: 0; height: 1px; background: var(--chocolate);
+      transition: width var(--transition);
+    }
+    .nav-tabs a:hover, .nav-tabs a.active { color: var(--chocolate); }
+    .nav-tabs a:hover::after, .nav-tabs a.active::after { width: 100%; }
+    
+    .admin-badge-tab { display: none; }
+    .admin-badge-tab.visible { display: inline-block; }
+
+    .social-icons { display: flex; align-items: center; gap: 1.25rem; }
+    .social-icons a {
+      color: var(--choc-soft); font-size: 1.1rem; transition: color var(--transition), transform var(--transition);
+    }
+    .social-icons a:hover { color: var(--gold); transform: translateY(-2px); }
+
+    .nav-toggle { display: none; flex-direction: column; gap: 5px; padding: 5px; }
+    .nav-toggle span { display: block; width: 22px; height: 2px; background: var(--chocolate); transition: var(--transition); }
+    .nav-toggle.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .nav-toggle.open span:nth-child(2) { opacity: 0; }
+    .nav-toggle.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    /* =====================================================
+       SPA VIEW MANAGER ANIMATION
+    ===================================================== */
+    .view { display: none; animation: fadeInUp 0.5s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
+    .view.active { display: block; }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* =====================================================
+       VIEW: HOME (BOMBOŞ ANA SAYFA)
+    ===================================================== */
+    #view-home { text-align: center; padding: 8rem 2rem; }
+    .home-hero-title { font-family: var(--font-serif); font-size: 3.5rem; font-weight: 400; letter-spacing: 0.05em; color: var(--chocolate); }
+
+    /* =====================================================
+       VIEW: MENU (PC ORTADAN ÇİZGİLİ / MOBİL TEK SÜTUN)
+    ===================================================== */
+    .menu-container {
+      max-width: 1200px; margin: 0 auto; padding: 4rem 2rem; position: relative;
+    }
+    .menu-split-layout {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; position: relative;
+    }
+    /* PC Dikey Estetik Çizgi */
+    .menu-split-layout::before {
+      content: ''; position: absolute; top: 0; bottom: 0; left: 50%;
+      width: 1px; background-color: var(--divider); transform: translateX(-50%);
+    }
+    .menu-column { display: flex; flex-direction: column; gap: 3rem; }
+    .menu-category-block { display: flex; flex-direction: column; gap: 1.5rem; }
+    .menu-cat-title {
+      font-family: var(--font-serif); font-size: 1.6rem; font-weight: 400;
+      color: var(--chocolate); border-bottom: 1px solid var(--divider); padding-bottom: 0.5rem;
+      letter-spacing: 0.05em;
+    }
+    .menu-item-row {
+      display: flex; justify-content: space-between; align-items: baseline; gap: 1rem;
+    }
+    .menu-item-name { font-weight: 500; font-size: 1.05rem; color: var(--chocolate); }
+    .menu-item-dots { flex: 1; border-bottom: 1px dotted var(--gray-ink); opacity: 0.4; position: relative; top: -4px; }
+    .menu-item-price { font-family: var(--font-serif); font-weight: 600; color: var(--choc-soft); }
+
+    /* =====================================================
+       VIEW: ABOUT
+    ===================================================== */
+    #view-about { max-width: 750px; margin: 0 auto; padding: 5rem 2rem; }
+    .about-title {
+      font-family: var(--font-serif); font-size: 2.2rem; font-weight: 400;
+      margin-bottom: 2rem; text-align: center; letter-spacing: 0.05em;
+    }
+    .about-md-render { line-height: 1.8; color: var(--choc-soft); font-size: 1.05rem; }
+
+    /* =====================================================
+       VIEW: ADMIN DASHBOARD / EDITORS
+    ===================================================== */
+    #view-admin { max-width: 1100px; margin: 0 auto; padding: 4rem 2rem; }
+    .admin-grid { display: grid; grid-template-columns: 1fr; gap: 2.5rem; margin-top: 2rem; }
+    @media (min-width: 850px) { .admin-grid { grid-template-columns: 1.2fr 1.8fr; } }
+    
+    .admin-box { background: var(--bg-card); border: 1px solid var(--divider); padding: 2rem; border-radius: var(--radius); }
+    .admin-box-title { font-family: var(--font-serif); font-size: 1.25rem; margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--divider); }
+    
+    /* Form Yapıları */
+    .form-group { margin-bottom: 1.25rem; display: flex; flex-direction: column; gap: 0.5rem; }
+    .form-group label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; color: var(--choc-soft); }
+    .form-ctrl {
+      width: 100%; padding: 0.75rem; border: 1px solid var(--divider); background: var(--white);
+      color: var(--chocolate); font-size: 0.9rem; border-radius: var(--radius); transition: border-color var(--transition);
+    }
+    .form-ctrl:focus { border-color: var(--chocolate); }
+    
+    .btn {
+      padding: 0.75rem 1.5rem; font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase;
+      font-weight: 600; border-radius: var(--radius); transition: all var(--transition); display: inline-block; text-align: center;
+    }
+    .btn-dark { background: var(--chocolate); color: var(--bg-cream); }
+    .btn-dark:hover { background: var(--choc-soft); }
+    .btn-sm { padding: 0.4rem 0.8rem; font-size: 0.7rem; }
+    .btn-danger { background: var(--danger); color: var(--white); }
+    
+    /* Gelişmiş Editör Listeleri (Sıralama ve Esneklik) */
+    .editor-list-item {
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--white); padding: 0.75rem 1rem; border: 1px solid var(--divider);
+      margin-bottom: 0.5rem; border-radius: var(--radius); gap: 1rem;
+    }
+    .item-drag-actions { display: flex; align-items: center; gap: 0.4rem; }
+    .item-drag-btn { color: var(--gray-ink); font-size: 0.85rem; padding: 4px; }
+    .item-drag-btn:hover { color: var(--chocolate); }
+
+    /* About Markdown Düzenleyici */
+    .about-edit-area { height: 250px; font-family: var(--font-mono); resize: vertical; }
+
+    /* =====================================================
+       SECRET ADMIN LOGIN TRIGGER & TOAST
+    ===================================================== */
+    #secret-lock-container {
+      position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 2000; display: flex; flex-direction: column; align-items: flex-end; gap: 1rem;
+    }
+    #lock-trigger {
+      width: 32px; height: 32px; border-radius: 50%; background: transparent;
+      color: var(--gray-ink); opacity: 0.4; display: flex; align-items: center; justify-content: center;
+      font-size: 0.85rem; transition: opacity var(--transition), color var(--transition);
+    }
+    #lock-trigger:hover { opacity: 1; color: var(--chocolate); }
+    
+    #secret-login-modal {
+      display: none; background: var(--white); border: 1px solid var(--chocolate);
+      padding: 1.5rem; box-shadow: var(--shadow-hover); width: 280px; border-radius: var(--radius);
+      animation: fadeInUp 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+    #secret-login-modal.open { display: block; }
+
+    .toast {
+      position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(100px);
+      padding: 0.8rem 2rem; background: var(--chocolate); color: var(--white);
+      border-radius: 30px; font-size: 0.85rem; letter-spacing: 0.05em; z-index: 3000;
+      opacity: 0; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: none;
+    }
+    .toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.error { background: var(--danger); }
+
+    /* =====================================================
+       MOBILE INTERFACE & MEDIA QUERIES
+    ===================================================== */
+    @media (max-width: 768px) {
+      .nav-toggle { display: flex; }
+      .nav-tabs {
+        display: flex; position: fixed; top: var(--nav-h); left: 0; right: 0; bottom: 0;
+        flex-direction: column; align-items: center; justify-content: flex-start;
+        background: rgba(251, 249, 246, 0.98); padding: 4rem 2rem; gap: 2.5rem;
+        transform: translateY(-100%); opacity: 0; transition: transform 0.4s ease, opacity 0.4s ease;
+        z-index: 999; pointer-events: none;
+      }
+      .nav-tabs.open { transform: translateY(0); opacity: 1; pointer-events: auto; }
+      .social-icons { display: none; } /* Mobilde temiz durması için üst sosyal ikonlar gizlenir */
+      
+      /* Menü Bölünme İptali (Tek dikey hat düzeni) */
+      .menu-split-layout { grid-template-columns: 1fr; gap: 3rem; }
+      .menu-split-layout::before { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOAST ALERTS MESSAGE -->
+  <div id="toast" class="toast"></div>
+
+  <!-- =====================================================
+       HEADER / NAVIGATION AREA
+  ===================================================== */ -->
+  <header id="navbar">
+    <div class="brand-logo" onclick="showView('home')">Nâre</div>
+
+    <button class="nav-toggle" aria-label="Menü" id="nav-toggle">
+      <span></span><span></span><span></span>
+    </button>
+
+    <ul class="nav-tabs" id="nav-tabs" role="tablist">
+      <li><a href="#" data-target="home" class="active">Ana Sayfa</a></li>
+      <li><a href="#" data-target="menu">Menü</a></li>
+      <li><a href="#" data-target="about">Hakkımızda</a></li>
+      <li><a href="#" data-target="admin" class="admin-badge-tab">Panel</a></li>
+    </ul>
+
+    <div class="social-icons">
+      <a href="https://x.com" target="_blank" aria-label="X (Twitter)"><i class="fa-brands fa-x-twitter"></i></a>
+      <a href="https://instagram.com" target="_blank" aria-label="Instagram)"><i class="fa-brands fa-instagram"></i></a>
+      <a href="https://facebook.com" target="_blank" aria-label="Facebook)"><i class="fa-brands fa-facebook"></i></a>
+    </div>
+  </header>
+
+  <!-- =====================================================
+       MAIN INTERFACE COMPONENT ROUTER
+  ===================================================== */ -->
+  <main>
+    
+    <!-- VIEW 1: HOME -->
+    <section id="view-home" class="view active">
+      <h1 class="home-hero-title">Nâre</h1>
+    </section>
+
+    <!-- VIEW 2: MENU VIEW -->
+    <section id="view-menu" class="view">
+      <div class="menu-container">
+        <div class="menu-split-layout">
+          <!-- Sol Sütun -->
+          <div class="menu-column" id="menu-col-left"></div>
+          <!-- Sağ Sütun -->
+          <div class="menu-column" id="menu-col-right"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 3: ABOUT VIEW -->
+    <section id="view-about" class="view">
+      <h2 class="about-title">Hakkımızda</h2>
+      <div id="about-content" class="about-wrapper about-md-render"></div>
+    </section>
+
+    <!-- VIEW 4: ADMIN DASHBOARD CONTROL PANEL -->
+    <section id="view-admin" class="view">
+      <div class="admin-toolbar" style="display:flex; justify-content:space-between; align-items:center;">
+        <h2>Yönetim Paneli</h2>
+        <button class="btn btn-secondary btn-sm" id="btn-logout">Oturumu Kapat</button>
+      </div>
+
+      <div class="admin-grid">
+        <!-- SOL PANEL: KATEGORİ EDİTÖRÜ -->
+        <div class="admin-box">
+          <h3 class="admin-box-title">Kategori Yönetimi</h3>
+          <div class="form-group">
+            <label>Yeni Kategori Adı</label>
+            <input type="text" id="input-cat-name" class="form-ctrl" placeholder="Örn: Sütlü Tatlılar" />
+          </div>
+          <div class="form-group">
+            <label>Sütun Yerleşimi (PC)</label>
+            <select id="select-cat-col" class="form-ctrl">
+              <option value="left">Sol Taraf</option>
+              <option value="right">Sağ Taraf</option>
+            </select>
+          </div>
+          <button class="btn btn-dark" id="btn-add-category" style="width:100%; margin-bottom:2rem;">Kategori Ekle</button>
+
+          <div id="admin-cat-list-container">
+            <!-- Dinamik kategori sıralama ve yönetim listesi -->
+          </div>
+        </div>
+
+        <!-- SAĞ PANEL: ÜRÜN EDİTÖRÜ & HAKKIMIZDA MARKDOWN -->
+        <div class="admin-layout-right" style="display:flex; flex-direction:column; gap:2.5rem;">
+          
+          <!-- Ürün Ekleme/Düzenleme Kutusu -->
+          <div class="admin-box">
+            <h3 class="admin-box-title" id="product-form-title">Yeni Ürün Ekle</h3>
+            <input type="hidden" id="edit-prod-id" value="" />
+            <div class="product-form-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+              <div class="form-group">
+                <label>Ürün Adı</label>
+                <input type="text" id="prod-name" class="form-ctrl" placeholder="Örn: Fıstıklı Baklava" />
+              </div>
+              <div class="form-group">
+                <label>Fiyat</label>
+                <input type="text" id="prod-price" class="form-ctrl" placeholder="Örn: 180 TL" />
+              </div>
+              <div class="form-group" style="grid-column: 1 / -1;">
+                <label>Kategori Bağlantısı</label>
+                <select id="prod-category-select" class="form-ctrl"></select>
+              </div>
+            </div>
+            <div style="display:flex; gap:1rem; margin-top:1rem;">
+              <button class="btn btn-dark" id="btn-save-product" style="flex:1;">Ürünü Kaydet</button>
+              <button class="btn btn-secondary btn-sm hidden" id="btn-cancel-edit">İptal</button>
+            </div>
+
+            <h4 style="margin-top:2rem; margin-bottom:1rem; font-size:0.9rem; text-transform:uppercase; letter-spacing:0.05rem;">Mevcut Ürün Listesi (Sıralama Değiştirilebilir)</h4>
+            <div id="admin-prod-list-container"></div>
+          </div>
+
+          <!-- Hakkımızda Düzenleme Kutusu -->
+          <div class="admin-box">
+            <h3 class="admin-box-title">Hakkımızda Sayfası İçeriği</h3>
+            <div class="form-group">
+              <label>Markdown Metni</label>
+              <textarea id="admin-about-editor" class="form-ctrl about-edit-area" placeholder="# Hikayemiz..."></textarea>
+            </div>
+            <button class="btn btn-dark" id="btn-save-about" style="width:100%;">Değişiklikleri Kaydet</button>
+            <div id="admin-preview" class="admin-live-preview about-md-render" style="margin-top:1rem; border:1px dashed var(--divider); padding:1rem; background:var(--bg-cream);"></div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- =====================================================
+       SECRET ADMIN TRIGGER INTERFACE CONTAINER
+  ===================================================== */ -->
+  <div id="secret-lock-container">
+    <div id="secret-login-modal">
+      <div class="form-group">
+        <label>E-Posta</label>
+        <input type="email" id="login-email" class="form-ctrl" placeholder="yonetici@nare.com" />
+      </div>
+      <div class="form-group">
+        <label>Şifre</label>
+        <input type="password" id="login-password" class="form-ctrl" placeholder="••••••••" />
+      </div>
+      <button class="btn btn-dark btn-sm" id="btn-login" style="width:100%;">Giriş</button>
+    </div>
+    
+    <button id="lock-trigger" aria-label="Yönetici Girişi"><i class="fa-solid fa-lock"></i></button>
+  </div>
+
+  <!-- =====================================================
+       JAVASCRIPT ARCHITECTURE ENVIRONMENT LOGIC
+  ===================================================== */ -->
+  <script>
+    'use strict';
+
+    /* --------------------------------------------------
+       SUPABASE CREDENTIALS INITIALIZATION
+    -------------------------------------------------- */
+    const SUPABASE_URL = "https://jqwrguaidmjlychbpwvt.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_b-sJtw7Jsrp8XJnsLMEo8w_PkPt3hLh";
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let cacheCategories = [];
+    let cacheProducts = [];
+
+    /* TOAST NOTIFIER SYSTEM */
+    function showToast(msg, isErr = false) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.toggle('error', isErr);
+      t.classList.add('visible');
+      setTimeout(() => t.classList.remove('visible'), 3500);
+    }
+
+    /* VIEW MANAGEMENT SYSTEMS SPA */
+    function showView(viewId) {
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      document.querySelectorAll('.nav-tabs a').forEach(a => a.classList.remove('active'));
+      
+      const target = document.getElementById(`view-${viewId}`);
+      if(target) target.classList.add('active');
+
+      const navLink = document.querySelector(`.nav-tabs a[data-target="${viewId}"]`);
+      if(navLink) navLink.classList.add('active');
+
+      // Close mobile overlay views
+      document.getElementById('nav-links')?.classList.remove('open');
+      document.getElementById('nav-tabs').classList.remove('open');
+      document.getElementById('nav-toggle').classList.remove('open');
+    }
+
+    document.querySelectorAll('.nav-tabs a, .brand-logo').forEach(element => {
+      element.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = element.dataset.target || 'home';
+        showView(target);
+      });
+    });
+
+    /* MOBILE NAVIGATION BURGER HAMBURGER TRIGGER */
+    document.getElementById('nav-toggle').addEventListener('click', function() {
+      this.classList.toggle('open');
+      document.getElementById('nav-tabs').classList.toggle('open');
+    });
+
+    /* --------------------------------------------------
+       DATA RECONSTRUCT LOGIC: PUBLIC READ CONTROLLERS
+    -------------------------------------------------- */
+    async function loadPublicData() {
+      try {
+        // Fetch categories rows context sorted by position rank indexes
+        const { data: cats, error: err1 } = await sb.from('categories').select('*').order('sort_index', { ascending: true });
+        if(err1) throw err1;
+        cacheCategories = cats || [];
+
+        // Fetch product rows context sorted by sorting position indexes
+        const { data: prods, error: err2 } = await sb.from('products').select('*').order('sort_index', { ascending: true });
+        if(err2) throw err2;
+        cacheProducts = prods || [];
+
+        renderMenuDOM();
+        renderAdminCategoryEditor();
+        renderAdminProductEditor();
+      } catch (err) {
+        showToast("Veriler yüklenirken hata oluştu: " + err.message, true);
+      }
+    }
+
+    function renderMenuDOM() {
+      const leftCol = document.getElementById('menu-col-left');
+      const rightCol = document.getElementById('menu-col-right');
+      leftCol.innerHTML = '';
+      rightCol.innerHTML = '';
+
+      // PC Sütun Dağılım Ayrıştırması
+      cacheCategories.forEach(cat => {
+        const catProds = cacheProducts.filter(p => p.category_id === cat.id);
+        
+        let blockHtml = `
+          <div class="menu-category-block">
+            <h3 class="menu-cat-title">${escHtml(cat.name)}</h3>
+        `;
+        
+        if(catProds.length === 0) {
+          blockHtml += `<p style="font-size:0.85rem; color:var(--gray-ink); font-style:italic;">Bu kategoride henüz ürün bulunmuyor.</p>`;
+        } else {
+          catProds.forEach(p => {
+            blockHtml += `
+              <div class="menu-item-row">
+                <span class="menu-item-name">${escHtml(p.name)}</span>
+                <span class="menu-item-dots"></span>
+                <span class="menu-item-price">${escHtml(p.price)}</span>
+              </div>
+            `;
+          });
+        }
+        blockHtml += `</div>`;
+
+        if(cat.column_placement === 'right') {
+          rightCol.innerHTML += blockHtml;
+        } else {
+          leftCol.innerHTML += blockHtml;
+        }
+      });
+    }
+
+    async function loadAboutContent() {
+      try {
+        const { data, error } = await sb.from('content').select('value').eq('key', 'about_page').single();
+        if(error && error.code !== 'PGRST116') throw error;
+        
+        const rawMd = data ? data.value : "# Hakkımızda\nHikayemiz yakında burada yer alacak...";
+        document.getElementById('about-content').innerHTML = marked.parse(rawMd);
+        document.getElementById('admin-about-editor').value = rawMd;
+        document.getElementById('admin-preview').innerHTML = marked.parse(rawMd);
+      } catch(err) {
+        showToast("Hakkımızda içeriği alınamadı.", true);
+      }
+    }
+
+    /* --------------------------------------------------
+       ADMIN STRATEGIES: CATEGORIES AND POSITION RANKS
+    -------------------------------------------------- */
+    document.getElementById('btn-add-category').addEventListener('click', async () => {
+      const name = document.getElementById('input-cat-name').value.trim();
+      const col = document.getElementById('select-cat-col').value;
+      if(!name) return;
+
+      try {
+        const nextIndex = cacheCategories.length * 10;
+        const { error } = await sb.from('categories').insert([{ name, column_placement: col, sort_index: nextIndex }]);
+        if(error) throw error;
+        
+        document.getElementById('input-cat-name').value = '';
+        showToast("Kategori başarıyla eklendi.");
+        loadPublicData();
+      } catch (err) {
+        showToast("Hata: " + err.message, true);
+      }
+    });
+
+    function renderAdminCategoryEditor() {
+      const container = document.getElementById('admin-cat-list-container');
+      const selectDropdown = document.getElementById('prod-category-select');
+      container.innerHTML = '';
+      selectDropdown.innerHTML = '';
+
+      cacheCategories.forEach((cat, index) => {
+        // Dropdown selection option injection lines
+        selectDropdown.innerHTML += `<option value="${cat.id}">${escHtml(cat.name)} (${cat.column_placement === 'left' ? 'Sol' : 'Sağ'})</option>`;
+        
+        // Editor panel drag and configure control items markup contexts
+        container.innerHTML += `
+          <div class="editor-list-item">
+            <div>
+              <strong>${escHtml(cat.name)}</strong> 
+              <span style="font-size:0.7rem; color:var(--gray-ink);">(${cat.column_placement === 'left' ? 'Sol' : 'Sağ'})</span>
+            </div>
+            <div class="item-drag-actions">
+              <button class="item-drag-btn" onclick="moveCategory(${cat.id}, 'up')" ${index === 0 ? 'disabled style="opacity:0.3;"' : ''}><i class="fa-solid fa-arrow-up"></i></button>
+              <button class="item-drag-btn" onclick="moveCategory(${cat.id}, 'down')" ${index === cacheCategories.length - 1 ? 'disabled style="opacity:0.3;"' : ''}><i class="fa-solid fa-arrow-down"></i></button>
+              <button class="item-drag-btn" onclick="toggleCategorySide(${cat.id}, '${cat.column_placement}')"><i class="fa-solid fa-arrows-left-right"></i></button>
+              <button class="item-drag-btn" style="color:var(--danger);" onclick="deleteCategory(${cat.id})"><i class="fa-solid fa-trash"></i></button>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    async function moveCategory(id, direction) {
+      const targetIndex = cacheCategories.findIndex(c => c.id === id);
+      if(targetIndex === -1) return;
+
+      let partnerIndex = direction === 'up' ? targetIndex - 1 : targetIndex + 1;
+      if(partnerIndex < 0 || partnerIndex >= cacheCategories.length) return;
+
+      const currentCat = cacheCategories[targetIndex];
+      const partnerCat = cacheCategories[partnerIndex];
+
+      try {
+        await sb.from('categories').update({ sort_index: partnerCat.sort_index }).eq('id', currentCat.id);
+        await sb.from('categories').update({ sort_index: currentCat.sort_index }).eq('id', partnerCat.id);
+        loadPublicData();
+      } catch(err) {
+        showToast("Sıralama değiştirilemedi.", true);
+      }
+    }
+
+    async function toggleCategorySide(id, currentSide) {
+      const nextSide = currentSide === 'left' ? 'right' : 'left';
+      try {
+        const { error } = await sb.from('categories').update({ column_placement: nextSide }).eq('id', id);
+        if(error) throw error;
+        loadPublicData();
+      } catch(err) { showToast("Sütun değiştirilemedi.", true); }
+    }
+
+    async function deleteCategory(id) {
+      if(!confirm("Kategoriyi silmek istediğinize emin misiniz? Bağlı ürünler kategorisiz kalacaktır.")) return;
+      try {
+        const { error } = await sb.from('categories').delete().eq('id', id);
+        if(error) throw error;
+        loadPublicData();
+      } catch(err) { showToast("Kategori silinemedi.", true); }
+    }
+
+    /* --------------------------------------------------
+       PRODUCT MUTATION PROCESSING CONTROLLER LOGIC
+    -------------------------------------------------- */
+    document.getElementById('btn-save-product').addEventListener('click', async () => {
+      const name = document.getElementById('prod-name').value.trim();
+      const price = document.getElementById('prod-price').value.trim();
+      const categoryId = parseInt(document.getElementById('prod-category-select').value);
+      const editId = document.getElementById('edit-prod-id').value;
+
+      if(!name || !price || !categoryId) {
+        showToast("Lütfen tüm alanları doldurun.", true);
+        return;
+      }
+
+      try {
+        if(editId) {
+          // Update current products
+          const { error } = await sb.from('products').update({ name, price, category_id: categoryId }).eq('id', editId);
+          if(error) throw error;
+          showToast("Ürün güncellendi.");
+        } else {
+          // Insert new products rows values context map configuration
+          const nextIndex = cacheProducts.length * 10;
+          const { error } = await sb.from('products').insert([{ name, price, category_id: categoryId, sort_index: nextIndex }]);
+          if(error) throw error;
+          showToast("Ürün başarıyla eklendi.");
+        }
+        resetProductForm();
+        loadPublicData();
+      } catch (err) { showToast("Ürün kaydedilemedi: " + err.message, true); }
+    });
+
+    function renderAdminProductEditor() {
+      const container = document.getElementById('admin-prod-list-container');
+      container.innerHTML = '';
+
+      cacheProducts.forEach((p, index) => {
+        const cat = cacheCategories.find(c => c.id === p.category_id);
+        const catName = cat ? cat.name : 'Belirsiz';
+
+        container.innerHTML += `
+          <div class="editor-list-item">
+            <div>
+              <strong>${escHtml(p.name)}</strong> — <span style="font-family:var(--font-serif);">${escHtml(p.price)}</span>
+              <div style="font-size:0.7rem; color:var(--gray-ink); margin-top:2px;">Grup: ${escHtml(catName)}</div>
+            </div>
+            <div class="item-drag-actions">
+              <button class="item-drag-btn" onclick="moveProduct(${p.id}, 'up')" ${index === 0 ? 'disabled style="opacity:0.3;"' : ''}><i class="fa-solid fa-arrow-up"></i></button>
+              <button class="item-drag-btn" onclick="moveProduct(${p.id}, 'down')" ${index === cacheProducts.length - 1 ? 'disabled style="opacity:0.3;"' : ''}><i class="fa-solid fa-arrow-down"></i></button>
+              <button class="item-drag-btn" onclick="startEditProduct(${p.id})"><i class="fa-solid fa-pen"></i></button>
+              <button class="item-drag-btn" style="color:var(--danger);" onclick="deleteProduct(${p.id})"><i class="fa-solid fa-trash"></i></button>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    async function moveProduct(id, direction) {
+      const targetIndex = cacheProducts.findIndex(p => p.id === id);
+      if(targetIndex === -1) return;
+
+      let partnerIndex = direction === 'up' ? targetIndex - 1 : targetIndex + 1;
+      if(partnerIndex < 0 || partnerIndex >= cacheProducts.length) return;
+
+      const currentProd = cacheProducts[targetIndex];
+      const partnerProd = cacheProducts[partnerIndex];
+
+      try {
+        await sb.from('products').update({ sort_index: partnerProd.sort_index }).eq('id', currentProd.id);
+        await sb.from('products').update({ sort_index: currentProd.sort_index }).eq('id', partnerProd.id);
+        loadPublicData();
+      } catch(err) { showToast("Sıralama değiştirilemedi.", true); }
+    }
+
+    function startEditProduct(id) {
+      const p = cacheProducts.find(prod => prod.id === id);
+      if(!p) return;
+
+      document.getElementById('edit-prod-id').value = p.id;
+      document.getElementById('prod-name').value = p.name;
+      document.getElementById('prod-price').value = p.price;
+      document.getElementById('prod-category-select').value = p.category_id;
+
+      document.getElementById('product-form-title').textContent = "Ürünü Düzenle";
+      document.getElementById('btn-cancel-edit').classList.remove('hidden');
+    }
+
+    function resetProductForm() {
+      document.getElementById('edit-prod-id').value = '';
+      document.getElementById('prod-name').value = '';
+      document.getElementById('prod-price').value = '';
+      document.getElementById('product-form-title').textContent = "Yeni Ürün Ekle";
+      document.getElementById('btn-cancel-edit').classList.add('hidden');
+    }
+    document.getElementById('btn-cancel-edit').addEventListener('click', resetProductForm);
+
+    async function deleteProduct(id) {
+      if(!confirm("Bu ürünü silmek istediğinize emin misiniz?")) return;
+      try {
+        const { error } = await sb.from('products').delete().eq('id', id);
+        if(error) throw error;
+        loadPublicData();
+      } catch(err) { showToast("Ürün silinemedi.", true); }
+    }
+
+    /* ABOUT EDITOR PROCESS OPERATIONS */
+    document.getElementById('admin-about-editor').addEventListener('input', function() {
+      document.getElementById('admin-preview').innerHTML = marked.parse(this.value);
+    });
+
+    document.getElementById('btn-save-about').addEventListener('click', async () => {
+      const val = document.getElementById('admin-about-editor').value;
+      const btn = document.getElementById('btn-save-about');
+      btn.disabled = true;
+      try {
+        const { error } = await sb.from('content').upsert({ key: 'about_page', value: val }, { onConflict: 'key' });
+        if(error) throw error;
+        showToast("Hakkımızda içeriği güncellendi.");
+        loadAboutContent();
+      } catch(err) { showToast("Kaydedilirken hata oluştu.", true); }
+      finally { btn.disabled = false; }
+    });
+
+    /* --------------------------------------------------
+       SECRET AUTH SECURITY PANEL AND TOAST TRIGGERS
+    -------------------------------------------------- */
+    const lockBtn = document.getElementById('lock-trigger');
+    const modalBox = document.getElementById('secret-login-modal');
+
+    lockBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      modalBox.classList.toggle('open');
+    });
+
+    document.addEventListener('click', (e) => {
+      if(!modalBox.contains(e.target) && e.target !== lockBtn) {
+        modalBox.classList.remove('open');
+      }
+    });
+
+    document.getElementById('btn-login').addEventListener('click', async () => {
+      const email = document.getElementById('login-email').value.trim();
+      const pass = document.getElementById('login-password').value;
+      try {
+        const { error } = await sb.auth.signInWithPassword({ email, password: pass });
+        if(error) throw error;
+        showToast("Başarıyla giriş yapıldı.");
+        modalBox.classList.remove('open');
+        evaluateSession();
+      } catch(err) { showToast("Giriş başarısız: " + err.message, true); }
+    });
+
+    document.getElementById('btn-logout').addEventListener('click', async () => {
+      await sb.auth.signOut();
+      showToast("Oturum kapatıldı.");
+      showView('home');
+      evaluateSession();
+    });
+
+    async function evaluateSession() {
+      const { data: { session } } = await sb.auth.getSession();
+      const adminBadge = document.getElementById('nav-admin-link')?.parentElement || document.querySelector('.admin-badge-tab');
+      
+      if(session) {
+        adminBadge.classList.add('visible');
+      } else {
+        adminBadge.classList.remove('visible');
+      }
+    }
+
+    // Auth Change listener stream binding
+    sb.auth.onAuthStateChange(() => { evaluateSession(); });
+
+    /* ANTI XSS UTILITIES ESCAPING HTML */
+    function escHtml(str) {
+      return String(str ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    /* --------------------------------------------------
+       INITIALIZE LIFECYCLE
+    -------------------------------------------------- */
+    loadPublicData();
+    loadAboutContent();
+    evaluateSession();
+
+  </script>
+</body>
+</html>
